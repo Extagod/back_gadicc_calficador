@@ -1,0 +1,213 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "ApiEncuestaPrototipe",
+    "version": "1.0"
+  },
+  "paths": {
+    "/api/encargados": {
+      "post": {
+        "tags": [
+          "Encargado"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Encargado"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Encargado"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/Encargado"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/encargados/token/{token}": {
+      "get": {
+        "tags": [
+          "Encargado"
+        ],
+        "parameters": [
+          {
+            "name": "token",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/calificaciones": {
+      "post": {
+        "tags": [
+          "Encargado"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearCalificacionDto"
+              }
+            },
+            "text/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearCalificacionDto"
+              }
+            },
+            "application/*+json": {
+              "schema": {
+                "$ref": "#/components/schemas/CrearCalificacionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/api/encargados/{id}/qr": {
+      "get": {
+        "tags": [
+          "Encargado"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Calificacion": {
+        "type": "object",
+        "properties": {
+          "idCalificacion": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "idEncargado": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "valor": {
+            "type": "string",
+            "nullable": true
+          },
+          "comentarios": {
+            "type": "string",
+            "nullable": true
+          },
+          "fechaHora": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "encargado": {
+            "$ref": "#/components/schemas/Encargado"
+          }
+        },
+        "additionalProperties": false
+      },
+      "CrearCalificacionDto": {
+        "type": "object",
+        "properties": {
+          "idEncargado": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "calificacion": {
+            "type": "string",
+            "nullable": true
+          },
+          "comentarios": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      },
+      "Encargado": {
+        "type": "object",
+        "properties": {
+          "idEncargado": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "nombre": {
+            "type": "string",
+            "nullable": true
+          },
+          "apellido": {
+            "type": "string",
+            "nullable": true
+          },
+          "direccion": {
+            "type": "string",
+            "nullable": true
+          },
+          "edad": {
+            "type": "integer",
+            "format": "int32",
+            "nullable": true
+          },
+          "cargo": {
+            "type": "string",
+            "nullable": true
+          },
+          "calificaciones": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Calificacion"
+            },
+            "nullable": true
+          },
+          "codigoQR": {
+            "type": "string",
+            "nullable": true
+          },
+          "tokenQR": {
+            "type": "string",
+            "nullable": true
+          }
+        },
+        "additionalProperties": false
+      }
+    }
+  }
+}

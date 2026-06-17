@@ -1,0 +1,66 @@
+[
+  {
+    "ContainingType": "ApiEncuestaPrototipe.Controllers.EncargadoController",
+    "Method": "CrearCalificacion",
+    "RelativePath": "api/calificaciones",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "ApiEncuestaPrototipe.Models.CrearCalificacionDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ApiEncuestaPrototipe.Controllers.EncargadoController",
+    "Method": "CrearEncargado",
+    "RelativePath": "api/encargados",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "encargado",
+        "Type": "ApiEncuestaPrototipe.Models.Encargado",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ApiEncuestaPrototipe.Controllers.EncargadoController",
+    "Method": "ObtenerQR",
+    "RelativePath": "api/encargados/{id}/qr",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "ApiEncuestaPrototipe.Controllers.EncargadoController",
+    "Method": "ObtenerPorToken",
+    "RelativePath": "api/encargados/token/{token}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "token",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

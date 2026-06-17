@@ -1,0 +1,197 @@
+{
+  "Version": 1,
+  "WorkspaceRootPath": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\",
+  "Documents": [
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\data\\appdbcontext.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\services\\qrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\services\\qrservice.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\models\\calificacion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\models\\calificacion.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\controllers\\encargadocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\controllers\\encargadocontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\models\\crearcalificaciondto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\models\\crearcalificaciondto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\models\\encargado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\models\\encargado.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\models\\calificaciondto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\models\\calificaciondto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\apiencuestaprototipe.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\apiencuestaprototipe.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|c:\\users\\pessu\\desktop\\c# curse\\apiencuestaprototipe\\apiencuestaprototipe\\apiencuestaprototipe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}",
+      "RelativeMoniker": "D:0:0:{6D074251-5830-D9E0-9063-F9CD6782E3BE}|ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj|solutionrelative:apiencuestaprototipe\\apiencuestaprototipe.http||{5703B403-55E7-4C63-8C88-A8F52C7A45C5}"
+    }
+  ],
+  "DocumentGroupContainers": [
+    {
+      "Orientation": 0,
+      "VerticalTabListWidth": 256,
+      "DocumentGroups": [
+        {
+          "DockedWidth": 200,
+          "SelectedChildIndex": 4,
+          "Children": [
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "Calificacion.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\Calificacion.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Models\\Calificacion.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\Calificacion.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Models\\Calificacion.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-25T02:32:44.666Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 7,
+              "Title": "ApiEncuestaPrototipe.csproj",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\ApiEncuestaPrototipe.csproj",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
+              "WhenOpened": "2026-05-25T02:31:12.773Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 6,
+              "Title": "CalificacionDto.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\CalificacionDto.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Models\\CalificacionDto.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\CalificacionDto.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Models\\CalificacionDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-24T23:24:38.521Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Program.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Program.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Program.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Program.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABcAAAAfAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-24T22:35:36.481Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AppDbContext.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Data\\AppDbContext.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Data\\AppDbContext.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Data\\AppDbContext.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Data\\AppDbContext.cs",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAABgAAABMAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-24T22:24:58.739Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "CrearCalificacionDto.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\CrearCalificacionDto.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Models\\CrearCalificacionDto.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\CrearCalificacionDto.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Models\\CrearCalificacionDto.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-25T02:35:24.339Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 1,
+              "Title": "QRService.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Services\\QRService.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Services\\QRService.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Services\\QRService.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Services\\QRService.cs",
+              "ViewState": "AgIAAAoAAAAAAAAAAAAuwBIAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-24T22:24:49.851Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "EncargadoController.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Controllers\\EncargadoController.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Controllers\\EncargadoController.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Controllers\\EncargadoController.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Controllers\\EncargadoController.cs",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAAAGAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-24T22:24:35.246Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\appsettings.json",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\appsettings.json",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\appsettings.json",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA4AAAABAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2026-05-24T23:32:01.559Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 5,
+              "Title": "Encargado.cs",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\Encargado.cs",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\Models\\Encargado.cs",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\Models\\Encargado.cs",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\Models\\Encargado.cs",
+              "ViewState": "AgIAAAIAAAAAAAAAAAAxwAkAAAAiAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2026-05-24T22:24:42.71Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 10,
+              "Title": "ApiEncuestaPrototipe.http",
+              "DocumentMoniker": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe.http",
+              "RelativeDocumentMoniker": "ApiEncuestaPrototipe\\ApiEncuestaPrototipe.http",
+              "ToolTip": "C:\\Users\\pessu\\Desktop\\C# Curse\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe\\ApiEncuestaPrototipe.http",
+              "RelativeToolTip": "ApiEncuestaPrototipe\\ApiEncuestaPrototipe.http",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003502|",
+              "WhenOpened": "2026-05-24T21:47:32.702Z"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
