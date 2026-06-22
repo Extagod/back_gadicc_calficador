@@ -10,10 +10,12 @@ namespace ApiEncuestaPrototipe.Controllers;
 public class EncargadoController : ControllerBase
 {
     private readonly IEncargadoService _encargadoService;
+    private readonly IConfiguration _config;
 
-    public EncargadoController(IEncargadoService encargadoService)
+    public EncargadoController(IEncargadoService encargadoService, IConfiguration config)
     {
         _encargadoService = encargadoService;
+        _config = config;
     }
 
     [HttpPost]
@@ -27,12 +29,15 @@ public class EncargadoController : ControllerBase
             return MapError(resultado);
 
         var enc = resultado.Value!;
+        var frontendUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
         return CreatedAtAction(nameof(ObtenerQR), new { id = enc.IdEncargado }, new
         {
             enc.IdEncargado,
             enc.Nombre,
             enc.Apellido,
             enc.TokenQR,
+            urlEncuestaLocal = $"http://localhost:5173/encuesta/{enc.TokenQR}",
+            urlEncuestaRed = $"{frontendUrl}/encuesta/{enc.TokenQR}",
             QRBase64 = enc.CodigoQR
         });
     }
@@ -96,7 +101,18 @@ public class EncargadoController : ControllerBase
         if (!resultado.IsSuccess)
             return MapError(resultado);
 
-        return Ok(new { qrBase64 = resultado.Value });
+        // Obtener el encargado actualizado para devolver el token y la URL
+        var encResult = await _encargadoService.ObtenerPorIdAsync(id);
+        var frontendUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
+        var token = encResult.Value?.TokenQR ?? "";
+
+        return Ok(new
+        {
+            qrBase64 = resultado.Value,
+            tokenQR = token,
+            urlEncuestaLocal = $"http://localhost:5173/encuesta/{token}",
+            urlEncuestaRed = $"{frontendUrl}/encuesta/{token}"
+        });
     }
 
     private IActionResult MapError<T>(ServiceResult<T> result)

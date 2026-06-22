@@ -8,4 +8,5 @@ public interface ICalificacionRepository
     Task<IEnumerable<Calificacion>> ObtenerPorEncargadoIdAsync(int idEncargado);
     Task<IEnumerable<Calificacion>> ObtenerPorEncargadoYRangoFechasAsync(
         int idEncargado, DateTime fechaInicio, DateTime fechaFin);
+    Task<IEnumerable<Calificacion>> ObtenerTodasConEncargadoAsync();
 }

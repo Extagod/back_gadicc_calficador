@@ -89,4 +89,10 @@ public class CalificacionService : ICalificacionService
             .ObtenerPorEncargadoYRangoFechasAsync(idEncargado, fechaInicio, fechaFin);
         return ServiceResult<IEnumerable<Calificacion>>.Success(calificaciones);
     }
+
+    public async Task<ServiceResult<IEnumerable<Calificacion>>> ObtenerTodasAsync()
+    {
+        var calificaciones = await _calificacionRepository.ObtenerTodasConEncargadoAsync();
+        return ServiceResult<IEnumerable<Calificacion>>.Success(calificaciones);
+    }
 }

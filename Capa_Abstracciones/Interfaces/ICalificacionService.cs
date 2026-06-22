@@ -10,4 +10,5 @@ public interface ICalificacionService
     Task<ServiceResult<IEnumerable<Calificacion>>> ObtenerPorEncargadoAsync(int idEncargado);
     Task<ServiceResult<IEnumerable<Calificacion>>> ObtenerPorEncargadoYRangoAsync(
         int idEncargado, DateTime fechaInicio, DateTime fechaFin);
+    Task<ServiceResult<IEnumerable<Calificacion>>> ObtenerTodasAsync();
 }

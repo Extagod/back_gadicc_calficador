@@ -36,4 +36,11 @@ public class CalificacionRepository : ICalificacionRepository
             .OrderByDescending(c => c.FechaHora)
             .AsNoTracking()
             .ToListAsync();
+
+    public async Task<IEnumerable<Calificacion>> ObtenerTodasConEncargadoAsync()
+        => await _context.Calificaciones
+            .Include(c => c.Encargado)
+            .OrderByDescending(c => c.FechaHora)
+            .AsNoTracking()
+            .ToListAsync();
 }

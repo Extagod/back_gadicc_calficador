@@ -54,10 +54,11 @@ partial class MainForm
         // === Tab Funcionarios ===
         this.tabFuncionarios.Text = "Funcionarios";
         this.tabFuncionarios.Padding = new Padding(10);
+        this.btnDashboard = new Button();
         this.tabFuncionarios.Controls.AddRange(new Control[]
         {
             lblBusqueda, this.txtBusqueda, this.dgvFuncionarios,
-            this.btnNuevo, this.btnEditar, this.btnEliminar, lblInfo
+            this.btnNuevo, this.btnEditar, this.btnEliminar, this.btnDashboard, lblInfo
         });
 
         lblBusqueda.Text = "Buscar:";
@@ -86,6 +87,14 @@ partial class MainForm
         this.btnEliminar.ForeColor = Color.DarkRed;
         this.btnEliminar.Click += BtnEliminar_Click;
 
+        this.btnDashboard.Text = "📊 Dashboard";
+        this.btnDashboard.Location = new Point(780, 8);
+        this.btnDashboard.Size = new Size(120, 30);
+        this.btnDashboard.BackColor = Color.FromArgb(33, 150, 243);
+        this.btnDashboard.ForeColor = Color.White;
+        this.btnDashboard.FlatStyle = FlatStyle.Flat;
+        this.btnDashboard.Click += BtnDashboard_Click;
+
         // DataGridView
         this.dgvFuncionarios.Location = new Point(15, 45);
         this.dgvFuncionarios.Size = new Size(940, 500);
@@ -108,58 +117,63 @@ partial class MainForm
         // === Tab Calificaciones ===
         this.tabCalificaciones.Text = "Calificaciones";
         this.tabCalificaciones.Padding = new Padding(10);
+        this.btnVerTodas = new Button();
         this.tabCalificaciones.Controls.AddRange(new Control[]
         {
             this.dgvCalificaciones, this.lblNoCalificaciones,
             this.lblTotal, this.lblExcelente, this.lblBuena, this.lblRegular, this.lblMala,
             lblFechaInicioLabel, this.dtpFechaInicio,
             lblFechaFinLabel, this.dtpFechaFin,
-            this.btnFiltrarFechas
+            this.btnFiltrarFechas, this.btnVerTodas
         });
 
         this.dgvCalificaciones.Location = new Point(15, 15);
-        this.dgvCalificaciones.Size = new Size(600, 500);
+        this.dgvCalificaciones.Size = new Size(700, 530);
         this.dgvCalificaciones.AllowUserToAddRows = false;
         this.dgvCalificaciones.AllowUserToDeleteRows = false;
         this.dgvCalificaciones.ReadOnly = true;
         this.dgvCalificaciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
         this.dgvCalificaciones.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
 
-        this.lblNoCalificaciones.Text = "Seleccione un funcionario y luego acceda a esta pestaña.";
+        this.lblNoCalificaciones.Text = "Cargando calificaciones...";
         this.lblNoCalificaciones.Location = new Point(15, 250);
         this.lblNoCalificaciones.Size = new Size(500, 25);
         this.lblNoCalificaciones.Font = new Font("Segoe UI", 10F, FontStyle.Italic);
-        this.lblNoCalificaciones.Visible = true;
+        this.lblNoCalificaciones.Visible = false;
 
-        int statsX = 640;
+        int statsX = 730;
 
         this.lblTotal.Text = "Total: 0";
         this.lblTotal.Location = new Point(statsX, 20);
         this.lblTotal.Size = new Size(200, 25);
-        this.lblTotal.Font = new Font("Segoe UI", 10F, FontStyle.Bold);
+        this.lblTotal.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
 
         this.lblExcelente.Text = "Excelente: 0";
         this.lblExcelente.Location = new Point(statsX, 55);
         this.lblExcelente.Size = new Size(200, 22);
+        this.lblExcelente.ForeColor = Color.FromArgb(46, 125, 50);
 
         this.lblBuena.Text = "Buena: 0";
         this.lblBuena.Location = new Point(statsX, 80);
         this.lblBuena.Size = new Size(200, 22);
+        this.lblBuena.ForeColor = Color.FromArgb(56, 142, 60);
 
         this.lblRegular.Text = "Regular: 0";
         this.lblRegular.Location = new Point(statsX, 105);
         this.lblRegular.Size = new Size(200, 22);
+        this.lblRegular.ForeColor = Color.FromArgb(245, 124, 0);
 
         this.lblMala.Text = "Mala: 0";
         this.lblMala.Location = new Point(statsX, 130);
         this.lblMala.Size = new Size(200, 22);
+        this.lblMala.ForeColor = Color.FromArgb(198, 40, 40);
 
         lblFechaInicioLabel.Text = "Desde:";
         lblFechaInicioLabel.Location = new Point(statsX, 180);
         lblFechaInicioLabel.AutoSize = true;
 
         this.dtpFechaInicio.Location = new Point(statsX, 203);
-        this.dtpFechaInicio.Size = new Size(200, 23);
+        this.dtpFechaInicio.Size = new Size(220, 23);
         this.dtpFechaInicio.Format = DateTimePickerFormat.Short;
 
         lblFechaFinLabel.Text = "Hasta:";
@@ -167,13 +181,18 @@ partial class MainForm
         lblFechaFinLabel.AutoSize = true;
 
         this.dtpFechaFin.Location = new Point(statsX, 258);
-        this.dtpFechaFin.Size = new Size(200, 23);
+        this.dtpFechaFin.Size = new Size(220, 23);
         this.dtpFechaFin.Format = DateTimePickerFormat.Short;
 
-        this.btnFiltrarFechas.Text = "Filtrar";
+        this.btnFiltrarFechas.Text = "🔍 Filtrar";
         this.btnFiltrarFechas.Location = new Point(statsX, 295);
-        this.btnFiltrarFechas.Size = new Size(120, 35);
+        this.btnFiltrarFechas.Size = new Size(100, 35);
         this.btnFiltrarFechas.Click += BtnFiltrarFechas_Click;
+
+        this.btnVerTodas.Text = "📋 Ver Todas";
+        this.btnVerTodas.Location = new Point(statsX + 110, 295);
+        this.btnVerTodas.Size = new Size(110, 35);
+        this.btnVerTodas.Click += BtnVerTodas_Click;
 
         // === MainForm ===
         this.AutoScaleDimensions = new SizeF(7F, 15F);
@@ -198,6 +217,7 @@ partial class MainForm
     private Button btnNuevo;
     private Button btnEditar;
     private Button btnEliminar;
+    private Button btnDashboard;
 
     // Tab Calificaciones
     private DataGridView dgvCalificaciones;
@@ -210,4 +230,5 @@ partial class MainForm
     private DateTimePicker dtpFechaInicio;
     private DateTimePicker dtpFechaFin;
     private Button btnFiltrarFechas;
+    private Button btnVerTodas;
 }

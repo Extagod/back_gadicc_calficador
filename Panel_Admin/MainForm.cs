@@ -182,6 +182,12 @@ public partial class MainForm : Form
         }
     }
 
+    private void BtnDashboard_Click(object? sender, EventArgs e)
+    {
+        using var form = new DashboardForm(_serviceProvider);
+        form.ShowDialog(this);
+    }
+
     private void DgvFuncionarios_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
     {
         if (e.RowIndex < 0) return;
@@ -200,18 +206,35 @@ public partial class MainForm : Form
     // === Tab Calificaciones ===
     private async void TabControl_SelectedIndexChanged(object? sender, EventArgs e)
     {
-        if (tabControl.SelectedTab == tabCalificaciones && _selectedFuncionario is not null)
+        if (tabControl.SelectedTab == tabCalificaciones)
         {
-            await CargarCalificacionesAsync(_selectedFuncionario.IdEncargado);
+            await CargarTodasCalificacionesAsync();
         }
     }
 
-    private async Task CargarCalificacionesAsync(int idEncargado)
+    private async Task CargarTodasCalificacionesAsync()
+    {
+        var resultado = await _calificacionService.ObtenerTodasAsync();
+        if (resultado.IsSuccess)
+        {
+            var calificaciones = resultado.Value!.ToList();
+            MostrarCalificaciones(calificaciones);
+        }
+    }
+
+    private async Task CargarCalificacionesPorFuncionarioAsync(int idEncargado)
     {
         var resultado = await _calificacionService.ObtenerPorEncargadoAsync(idEncargado);
         if (resultado.IsSuccess)
         {
             var calificaciones = resultado.Value!.ToList();
+            // Necesitamos el encargado para mostrar su nombre
+            var encResult = _funcionarios.FirstOrDefault(f => f.IdEncargado == idEncargado);
+            foreach (var c in calificaciones)
+            {
+                if (c.Encargado is null && encResult is not null)
+                    c.Encargado = encResult;
+            }
             MostrarCalificaciones(calificaciones);
         }
     }
@@ -220,6 +243,7 @@ public partial class MainForm : Form
     {
         if (calificaciones.Count == 0)
         {
+            lblNoCalificaciones.Text = "No hay calificaciones registradas.";
             lblNoCalificaciones.Visible = true;
             dgvCalificaciones.DataSource = null;
         }
@@ -230,7 +254,11 @@ public partial class MainForm : Form
                 .OrderByDescending(c => c.FechaHora)
                 .Select(c => new
                 {
-                    c.FechaHora,
+                    Fecha = c.FechaHora.ToString("dd/MM/yyyy HH:mm"),
+                    Funcionario = c.Encargado is not null
+                        ? $"{c.Encargado.Nombre} {c.Encargado.Apellido}"
+                        : $"ID: {c.IdEncargado}",
+                    Cargo = c.Encargado?.Cargo ?? "—",
                     Valor = c.Valor.ToString(),
                     c.Comentarios
                 }).ToList();
@@ -245,13 +273,6 @@ public partial class MainForm : Form
 
     private async void BtnFiltrarFechas_Click(object? sender, EventArgs e)
     {
-        if (_selectedFuncionario is null)
-        {
-            MessageBox.Show("Seleccione un funcionario de la pestaña Funcionarios primero.",
-                "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
         if (dtpFechaInicio.Value > dtpFechaFin.Value)
         {
             MessageBox.Show("La fecha de inicio no puede ser posterior a la fecha de fin.",
@@ -259,12 +280,32 @@ public partial class MainForm : Form
             return;
         }
 
-        var resultado = await _calificacionService.ObtenerPorEncargadoYRangoAsync(
-            _selectedFuncionario.IdEncargado, dtpFechaInicio.Value, dtpFechaFin.Value);
-
-        if (resultado.IsSuccess)
+        // Si hay funcionario seleccionado, filtrar por ese funcionario
+        if (_selectedFuncionario is not null)
         {
-            MostrarCalificaciones(resultado.Value!.ToList());
+            var resultado = await _calificacionService.ObtenerPorEncargadoYRangoAsync(
+                _selectedFuncionario.IdEncargado, dtpFechaInicio.Value, dtpFechaFin.Value);
+
+            if (resultado.IsSuccess)
+            {
+                var calificaciones = resultado.Value!.ToList();
+                foreach (var c in calificaciones)
+                {
+                    if (c.Encargado is null)
+                        c.Encargado = _selectedFuncionario;
+                }
+                MostrarCalificaciones(calificaciones);
+            }
         }
+        else
+        {
+            // Sin filtro de funcionario, mostrar todas
+            await CargarTodasCalificacionesAsync();
+        }
+    }
+
+    private async void BtnVerTodas_Click(object? sender, EventArgs e)
+    {
+        await CargarTodasCalificacionesAsync();
     }
 }
