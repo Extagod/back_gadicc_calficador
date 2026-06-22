@@ -12,4 +12,5 @@ public interface IEncargadoService
     Task<ServiceResult<IEnumerable<Encargado>>> ObtenerTodosAsync();
     Task<ServiceResult<Encargado>> ActualizarEncargadoAsync(int id, CrearEncargadoDto dto);
     Task<ServiceResult<string>> RegenerarQRAsync(int id);
+    Task<ServiceResult<bool>> EliminarEncargadoAsync(int id);
 }

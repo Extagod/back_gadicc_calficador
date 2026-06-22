@@ -35,4 +35,10 @@ public class EncargadoRepository : IEncargadoRepository
         _context.Encargados.Update(encargado);
         await _context.SaveChangesAsync();
     }
+
+    public async Task EliminarAsync(Encargado encargado)
+    {
+        _context.Encargados.Remove(encargado);
+        await _context.SaveChangesAsync();
+    }
 }

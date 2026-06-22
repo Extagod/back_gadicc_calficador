@@ -9,4 +9,5 @@ public interface IEncargadoRepository
     Task<IEnumerable<Encargado>> ObtenerTodosAsync();
     Task<Encargado> AgregarAsync(Encargado encargado);
     Task ActualizarAsync(Encargado encargado);
+    Task EliminarAsync(Encargado encargado);
 }

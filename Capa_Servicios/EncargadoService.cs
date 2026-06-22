@@ -90,4 +90,14 @@ public class EncargadoService : IEncargadoService
         await _encargadoRepository.ActualizarAsync(encargado);
         return ServiceResult<string>.Success(encargado.CodigoQR);
     }
+
+    public async Task<ServiceResult<bool>> EliminarEncargadoAsync(int id)
+    {
+        var encargado = await _encargadoRepository.ObtenerPorIdAsync(id);
+        if (encargado is null)
+            return ServiceResult<bool>.NotFound($"Encargado con Id {id} no encontrado.");
+
+        await _encargadoRepository.EliminarAsync(encargado);
+        return ServiceResult<bool>.Success(true);
+    }
 }

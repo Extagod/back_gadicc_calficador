@@ -10,10 +10,11 @@
 using System;
 using System.Reflection;
 
+[assembly: Microsoft.Extensions.Configuration.UserSecrets.UserSecretsIdAttribute("4ddd56ce-e7fc-4be6-9dd2-74806ab673dc")]
 [assembly: System.Reflection.AssemblyCompanyAttribute("ApiEncuestaPrototipe")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+890499ac9cdf31f221e8fb64d594201748330d5c")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3538fa0e0bd33811d7cc5fb901c479c1e2d0bc7f")]
 [assembly: System.Reflection.AssemblyProductAttribute("ApiEncuestaPrototipe")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ApiEncuestaPrototipe")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
