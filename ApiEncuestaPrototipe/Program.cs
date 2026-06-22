@@ -1,15 +1,25 @@
-using ApiEncuestaPrototipe.Data;
-using ApiEncuestaPrototipe.Services;
+using Capa_Datos;
+using Capa_Datos.Repositories;
+using Capa_Abstracciones.Interfaces;
+using Capa_Servicios;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// PostgreSQL
+// SQL Server
 builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Servicio QR
-builder.Services.AddScoped<QRService>();
+// Repositories
+builder.Services.AddScoped<IEncargadoRepository, EncargadoRepository>();
+builder.Services.AddScoped<ICalificacionRepository, CalificacionRepository>();
+builder.Services.AddScoped<IUsuarioAdminRepository, UsuarioAdminRepository>();
+
+// Services
+builder.Services.AddScoped<IQRService, QRServiceImpl>();
+builder.Services.AddScoped<IEncargadoService, EncargadoService>();
+builder.Services.AddScoped<ICalificacionService, CalificacionService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();

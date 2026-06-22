@@ -1,0 +1,12 @@
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\bin\Debug\net8.0\Capa_Abstracciones.deps.json
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\bin\Debug\net8.0\Capa_Abstracciones.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\bin\Debug\net8.0\Capa_Abstracciones.pdb
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.AssemblyInfoInputs.cache
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.AssemblyInfo.cs
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.csproj.CoreCompileInputs.cache
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.sourcelink.json
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\refint\Capa_Abstracciones.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\Capa_Abstracciones.pdb
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Abstracciones\obj\Debug\net8.0\ref\Capa_Abstracciones.dll

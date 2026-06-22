@@ -1,0 +1,16 @@
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\bin\Debug\net8.0\Capa_Servicios.deps.json
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\bin\Debug\net8.0\Capa_Servicios.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\bin\Debug\net8.0\Capa_Servicios.pdb
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\bin\Debug\net8.0\Capa_Abstracciones.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\bin\Debug\net8.0\Capa_Abstracciones.pdb
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.csproj.AssemblyReference.cache
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.AssemblyInfoInputs.cache
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.AssemblyInfo.cs
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.csproj.CoreCompileInputs.cache
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.sourcelink.json
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Ser.FCA9E5DE.Up2Date
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\refint\Capa_Servicios.dll
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\Capa_Servicios.pdb
+C:\Users\pessu\Desktop\Proyecto Practicas\back_gadicc_calficador\Capa_Servicios\obj\Debug\net8.0\ref\Capa_Servicios.dll

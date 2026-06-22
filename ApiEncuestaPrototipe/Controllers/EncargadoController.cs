@@ -1,114 +1,111 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using ApiEncuestaPrototipe.Data;
-using ApiEncuestaPrototipe.Models;
-using ApiEncuestaPrototipe.Services;
+using Capa_Abstracciones.Common;
+using Capa_Abstracciones.DTOs;
+using Capa_Abstracciones.Interfaces;
 
-namespace ApiEncuestaPrototipe.Controllers
+namespace ApiEncuestaPrototipe.Controllers;
+
+[ApiController]
+[Route("api/encargados")]
+public class EncargadoController : ControllerBase
 {
-    [ApiController]
-    [Route("api/encargados")]  // ← plural para coincidir con el frontend
-    public class EncargadoController : ControllerBase
+    private readonly IEncargadoService _encargadoService;
+
+    public EncargadoController(IEncargadoService encargadoService)
     {
-        private readonly AppDbContext _context;
-        private readonly QRService _qrService;
-        private readonly IConfiguration _config;
+        _encargadoService = encargadoService;
+    }
 
-        public EncargadoController(AppDbContext context, QRService qrService, IConfiguration config)
+    [HttpPost]
+    public async Task<IActionResult> CrearEncargado([FromBody] CrearEncargadoDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
+
+        var resultado = await _encargadoService.CrearEncargadoAsync(dto);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
+
+        var enc = resultado.Value!;
+        return CreatedAtAction(nameof(ObtenerQR), new { id = enc.IdEncargado }, new
         {
-            _context = context;
-            _qrService = qrService;
-            _config = config;
-        }
+            enc.IdEncargado,
+            enc.Nombre,
+            enc.Apellido,
+            enc.TokenQR,
+            QRBase64 = enc.CodigoQR
+        });
+    }
 
-        // ─── POST /api/encargados ─────────────────────────────────────────────
-        // Crea encargado y genera QR único
-        [HttpPost]
-        public async Task<IActionResult> CrearEncargado([FromBody] Encargado encargado)
+    [HttpGet("token/{token}")]
+    public async Task<IActionResult> ObtenerPorToken(string token)
+    {
+        var resultado = await _encargadoService.ObtenerPorTokenQRAsync(token);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
+
+        var enc = resultado.Value!;
+        return Ok(new
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            idEncargado = enc.IdEncargado,
+            nombre = enc.Nombre,
+            apellido = enc.Apellido,
+            cargo = enc.Cargo ?? ""
+        });
+    }
 
-            encargado.TokenQR = Guid.NewGuid().ToString("N");
+    [HttpGet("{id}/qr")]
+    public async Task<IActionResult> ObtenerQR(int id)
+    {
+        var resultado = await _encargadoService.ObtenerPorIdAsync(id);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
 
-            var baseUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
-            var urlEncuesta = $"{baseUrl}/encuesta/{encargado.TokenQR}";
+        var enc = resultado.Value!;
+        if (string.IsNullOrEmpty(enc.CodigoQR))
+            return NotFound(new { mensaje = "Este encargado no tiene QR generado." });
 
-            encargado.CodigoQR = _qrService.GenerarQRBase64(urlEncuesta);
+        var bytes = Convert.FromBase64String(enc.CodigoQR);
+        return File(bytes, "image/png");
+    }
 
-            _context.Encargados.Add(encargado);
-            await _context.SaveChangesAsync();
+    [HttpGet]
+    public async Task<IActionResult> ObtenerTodos()
+    {
+        var resultado = await _encargadoService.ObtenerTodosAsync();
+        return Ok(resultado.Value);
+    }
 
-            return CreatedAtAction(nameof(ObtenerQR), new { id = encargado.IdEncargado }, new
-            {
-                encargado.IdEncargado,
-                encargado.Nombre,
-                encargado.Apellido,
-                encargado.TokenQR,
-                UrlEncuesta = urlEncuesta,
-                QRBase64 = encargado.CodigoQR
-            });
-        }
+    [HttpPut("{id}")]
+    public async Task<IActionResult> ActualizarEncargado(int id, [FromBody] CrearEncargadoDto dto)
+    {
+        if (!ModelState.IsValid)
+            return BadRequest(ModelState);
 
-        // ─── GET /api/encargados/token/{token} ────────────────────────────────
-        // LLAMADA #1 del frontend: al escanear el QR obtiene datos del encargado
-        // Respuesta esperada por el frontend:
-        // { idEncargado, nombre, apellido, cargo }
-        [HttpGet("token/{token}")]
-        public async Task<IActionResult> ObtenerPorToken(string token)
+        var resultado = await _encargadoService.ActualizarEncargadoAsync(id, dto);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
+
+        return Ok(resultado.Value);
+    }
+
+    [HttpPost("{id}/regenerar-qr")]
+    public async Task<IActionResult> RegenerarQR(int id)
+    {
+        var resultado = await _encargadoService.RegenerarQRAsync(id);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
+
+        return Ok(new { qrBase64 = resultado.Value });
+    }
+
+    private IActionResult MapError<T>(ServiceResult<T> result)
+    {
+        return result.ErrorType switch
         {
-            var encargado = await _context.Encargados
-                .FirstOrDefaultAsync(e => e.TokenQR == token);
-
-            if (encargado == null)
-                return NotFound(new { mensaje = "El código QR no es válido o ya no está disponible." });
-
-            return Ok(new
-            {
-                idEncargado = encargado.IdEncargado,  // camelCase para el frontend
-                nombre = encargado.Nombre,
-                apellido = encargado.Apellido,
-                cargo = encargado.Cargo ?? ""
-            });
-        }
-
-        // ─── POST /api/calificaciones ─────────────────────────────────────────
-        // LLAMADA #2 del frontend: inserta nueva calificación (nunca sobreescribe)
-        [HttpPost("/api/calificaciones")]
-        public async Task<IActionResult> CrearCalificacion([FromBody] CrearCalificacionDto dto)
-        {
-            var encargado = await _context.Encargados.FindAsync(dto.IdEncargado);
-            if (encargado == null)
-                return NotFound(new { mensaje = "Encargado no encontrado." });
-
-            var calificacion = new Calificacion
-            {
-                IdEncargado = dto.IdEncargado,
-                Valor = dto.Calificacion,
-                Comentarios = dto.Comentarios,
-                FechaHora = DateTime.UtcNow
-            };
-
-            _context.Calificaciones.Add(calificacion);
-            await _context.SaveChangesAsync();
-
-            return Ok(new { mensaje = "Calificación guardada correctamente." });
-        }
-
-
-        // ─── GET /api/encargados/{id}/qr ──────────────────────────────────────
-        // Devuelve imagen PNG del QR para imprimir/mostrar en panel admin
-        [HttpGet("{id}/qr")]
-        public async Task<IActionResult> ObtenerQR(int id)
-        {
-            var encargado = await _context.Encargados.FindAsync(id);
-            if (encargado == null) return NotFound();
-
-            if (string.IsNullOrEmpty(encargado.CodigoQR))
-                return NotFound(new { mensaje = "Este encargado no tiene QR generado." });
-
-            var bytes = Convert.FromBase64String(encargado.CodigoQR);
-            return File(bytes, "image/png");
-        }
+            ServiceErrorType.NotFound => NotFound(new { mensaje = result.ErrorMessage }),
+            ServiceErrorType.Validation => BadRequest(new { mensaje = result.ErrorMessage }),
+            _ => StatusCode(500, new { mensaje = result.ErrorMessage })
+        };
     }
 }
