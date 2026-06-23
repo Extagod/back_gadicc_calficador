@@ -14,4 +14,6 @@ public class CrearCalificacionDto
 
     [MaxLength(500, ErrorMessage = "Los comentarios no pueden exceder 500 caracteres.")]
     public string? Comentarios { get; set; }
+
+    public DateTime? FechaCliente { get; set; }
 }

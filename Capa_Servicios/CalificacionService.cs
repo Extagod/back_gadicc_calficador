@@ -19,7 +19,7 @@ public class CalificacionService : ICalificacionService
         _encargadoRepository = encargadoRepository;
     }
 
-    public async Task<ServiceResult<Calificacion>> CrearCalificacionAsync(CrearCalificacionDto dto)
+    public async Task<ServiceResult<Calificacion>> CrearCalificacionAsync(CrearCalificacionDto dto, string? ip = null, string? fingerprint = null, string? userAgent = null)
     {
         // Validate non-empty calificacion
         if (string.IsNullOrWhiteSpace(dto.Calificacion))
@@ -49,7 +49,11 @@ public class CalificacionService : ICalificacionService
             IdEncargado = dto.IdEncargado,
             Valor = valor,
             Comentarios = dto.Comentarios?.Trim(),
-            FechaHora = DateTime.UtcNow
+            FechaHora = DateTime.UtcNow,
+            IpCliente = ip,
+            DeviceFingerprint = fingerprint,
+            UserAgent = userAgent,
+            FechaCliente = dto.FechaCliente
         };
 
         var resultado = await _calificacionRepository.AgregarAsync(calificacion);

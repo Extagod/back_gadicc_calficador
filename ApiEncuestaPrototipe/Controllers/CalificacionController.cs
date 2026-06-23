@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Capa_Abstracciones.Common;
 using Capa_Abstracciones.DTOs;
 using Capa_Abstracciones.Interfaces;
@@ -17,12 +18,26 @@ public class CalificacionController : ControllerBase
     }
 
     [HttpPost]
+    [EnableRateLimiting("calificaciones")]
     public async Task<IActionResult> CrearCalificacion([FromBody] CrearCalificacionDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var resultado = await _calificacionService.CrearCalificacionAsync(dto);
+        // Obtener IP real (considerar proxy)
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        if (HttpContext.Request.Headers.ContainsKey("X-Forwarded-For"))
+        {
+            ip = HttpContext.Request.Headers["X-Forwarded-For"].FirstOrDefault()?.Split(',')[0].Trim();
+        }
+
+        // Fingerprint del dispositivo
+        var fingerprint = HttpContext.Request.Headers["X-Client-Fingerprint"].FirstOrDefault();
+
+        // UserAgent completo
+        var userAgent = HttpContext.Request.Headers["User-Agent"].FirstOrDefault();
+
+        var resultado = await _calificacionService.CrearCalificacionAsync(dto, ip, fingerprint, userAgent);
         if (!resultado.IsSuccess)
         {
             return resultado.ErrorType switch

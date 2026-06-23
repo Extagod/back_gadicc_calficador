@@ -1,7 +1,9 @@
+using System.Threading.RateLimiting;
 using Capa_Datos;
 using Capa_Datos.Repositories;
 using Capa_Abstracciones.Interfaces;
 using Capa_Servicios;
+using ApiEncuestaPrototipe.Middleware;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -25,19 +27,45 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// CORS — se registra el policy ANTES de builder.Build()
+// CORS — Permitir todos los orígenes en modo test
 builder.Services.AddCors(options =>
 {
-    options.AddPolicy("FrontendPolicy", policy =>
+    options.AddDefaultPolicy(policy =>
     {
-        policy.WithOrigins("http://localhost:5173")
+        policy.AllowAnyOrigin()
               .AllowAnyHeader()
               .AllowAnyMethod();
     });
 });
 
-// ─── A partir de aquí ya existe `app` ───────────────────────────────────────
+// Rate Limiting — 5 calificaciones por IP cada 10 minutos
+builder.Services.AddRateLimiter(options =>
+{
+    options.AddPolicy("calificaciones", context =>
+        RateLimitPartition.GetFixedWindowLimiter(
+            partitionKey: context.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+            factory: _ => new FixedWindowRateLimiterOptions
+            {
+                PermitLimit = 5,
+                Window = TimeSpan.FromMinutes(10),
+                QueueLimit = 0,
+            }));
+
+    options.OnRejected = async (context, cancellationToken) =>
+    {
+        context.HttpContext.Response.StatusCode = 429;
+        context.HttpContext.Response.ContentType = "application/json";
+        await context.HttpContext.Response.WriteAsJsonAsync(new
+        {
+            mensaje = "Ha excedido el límite de calificaciones. Intente en unos minutos."
+        }, cancellationToken);
+    };
+});
+
 var app = builder.Build();
+
+// Middleware pipeline
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
 {
@@ -45,10 +73,8 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-// CORS — se aplica el policy DESPUÉS de builder.Build()
-// Debe ir ANTES de UseAuthorization y MapControllers
-app.UseCors("FrontendPolicy");
-
+app.UseCors();
+app.UseRateLimiter();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();

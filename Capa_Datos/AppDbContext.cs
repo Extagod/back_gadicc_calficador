@@ -31,6 +31,9 @@ public class AppDbContext : DbContext
             entity.HasKey(e => e.IdCalificacion);
             entity.Property(e => e.Valor).IsRequired();
             entity.Property(e => e.Comentarios).HasMaxLength(500);
+            entity.Property(e => e.IpCliente).HasMaxLength(45);
+            entity.Property(e => e.DeviceFingerprint).HasMaxLength(16);
+            entity.Property(e => e.UserAgent).HasMaxLength(500);
             entity.HasOne(c => c.Encargado)
                   .WithMany(e => e.Calificaciones)
                   .HasForeignKey(c => c.IdEncargado)

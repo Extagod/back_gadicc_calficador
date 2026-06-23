@@ -19,6 +19,18 @@ public class Calificacion
 
     public DateTime FechaHora { get; set; } = DateTime.UtcNow;
 
+    // Campos de auditoría
+    [MaxLength(45)]
+    public string? IpCliente { get; set; }
+
+    [MaxLength(16)]
+    public string? DeviceFingerprint { get; set; }
+
+    [MaxLength(500)]
+    public string? UserAgent { get; set; }
+
+    public DateTime? FechaCliente { get; set; }
+
     // Navigation
     public Encargado Encargado { get; set; } = null!;
 }
