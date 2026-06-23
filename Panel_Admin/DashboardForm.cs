@@ -38,45 +38,22 @@ public partial class DashboardForm : Form
         var calificaciones = calResult.Value!.ToList();
         var funcionarios = encResult.Value!.ToList();
 
-        // === Estadísticas generales ===
-        lblTotalCalificaciones.Text = $"Total de calificaciones: {calificaciones.Count}";
-        lblTotalFuncionarios.Text = $"Total de funcionarios: {funcionarios.Count}";
-
         var excelente = calificaciones.Count(c => c.Valor == ValorCalificacion.Excelente);
         var buena = calificaciones.Count(c => c.Valor == ValorCalificacion.Buena);
         var regular = calificaciones.Count(c => c.Valor == ValorCalificacion.Regular);
         var mala = calificaciones.Count(c => c.Valor == ValorCalificacion.Mala);
 
-        // === Gráfica de Pastel - Distribución de calificaciones ===
-        pieChart.Series = new ISeries[]
-        {
-            new PieSeries<int>
-            {
-                Values = new[] { excelente },
-                Name = "Excelente",
-                Fill = new SolidColorPaint(new SKColor(46, 125, 50))
-            },
-            new PieSeries<int>
-            {
-                Values = new[] { buena },
-                Name = "Buena",
-                Fill = new SolidColorPaint(new SKColor(76, 175, 80))
-            },
-            new PieSeries<int>
-            {
-                Values = new[] { regular },
-                Name = "Regular",
-                Fill = new SolidColorPaint(new SKColor(255, 152, 0))
-            },
-            new PieSeries<int>
-            {
-                Values = new[] { mala },
-                Name = "Mala",
-                Fill = new SolidColorPaint(new SKColor(211, 47, 47))
-            }
-        };
+        // === Tarjetas de resumen ===
+        lblCardTotal.Text = calificaciones.Count.ToString();
+        lblCardExcelente.Text = excelente.ToString();
+        lblCardBuena.Text = buena.ToString();
+        lblCardRegular.Text = regular.ToString();
+        lblCardMala.Text = mala.ToString();
+        lblCardFuncionarios.Text = funcionarios.Count.ToString();
 
-        // === Gráfica de Barras - Calificaciones por funcionario ===
+        // === Gráfica de Donut === (removida)
+
+        // === Gráfica de Barras por funcionario ===
         var porFuncionario = calificaciones
             .GroupBy(c => c.IdEncargado)
             .Select(g =>
@@ -93,46 +70,53 @@ public partial class DashboardForm : Form
                 };
             })
             .OrderByDescending(x => x.Total)
-            .Take(10)
+            .Take(8)
             .ToList();
 
-        var nombres = porFuncionario.Select(x => x.Nombre).ToArray();
-
-        barChart.XAxes = new[]
-        {
-            new Axis
-            {
-                Labels = nombres,
-                LabelsRotation = 15
-            }
-        };
-
+        barChart.XAxes = new[] { new Axis { Labels = porFuncionario.Select(x => x.Nombre).ToArray(), LabelsRotation = 15 } };
         barChart.Series = new ISeries[]
         {
-            new ColumnSeries<int>
+            new ColumnSeries<int> { Values = porFuncionario.Select(x => x.Excelente).ToArray(), Name = "Excelente", Fill = new SolidColorPaint(new SKColor(46, 125, 50)) },
+            new ColumnSeries<int> { Values = porFuncionario.Select(x => x.Buena).ToArray(), Name = "Buena", Fill = new SolidColorPaint(new SKColor(76, 175, 80)) },
+            new ColumnSeries<int> { Values = porFuncionario.Select(x => x.Regular).ToArray(), Name = "Regular", Fill = new SolidColorPaint(new SKColor(255, 152, 0)) },
+            new ColumnSeries<int> { Values = porFuncionario.Select(x => x.Mala).ToArray(), Name = "Mala", Fill = new SolidColorPaint(new SKColor(211, 47, 47)) }
+        };
+
+        // === Gráfica de línea temporal ===
+        var porDia = calificaciones
+            .GroupBy(c => c.FechaHora.Date)
+            .OrderBy(g => g.Key)
+            .TakeLast(14)
+            .ToList();
+
+        lineChart.XAxes = new[] { new Axis { Labels = porDia.Select(g => g.Key.ToString("dd/MM")).ToArray() } };
+        lineChart.Series = new ISeries[]
+        {
+            new LineSeries<int>
             {
-                Values = porFuncionario.Select(x => x.Excelente).ToArray(),
-                Name = "Excelente",
-                Fill = new SolidColorPaint(new SKColor(46, 125, 50))
-            },
-            new ColumnSeries<int>
-            {
-                Values = porFuncionario.Select(x => x.Buena).ToArray(),
-                Name = "Buena",
-                Fill = new SolidColorPaint(new SKColor(76, 175, 80))
-            },
-            new ColumnSeries<int>
-            {
-                Values = porFuncionario.Select(x => x.Regular).ToArray(),
-                Name = "Regular",
-                Fill = new SolidColorPaint(new SKColor(255, 152, 0))
-            },
-            new ColumnSeries<int>
-            {
-                Values = porFuncionario.Select(x => x.Mala).ToArray(),
-                Name = "Mala",
-                Fill = new SolidColorPaint(new SKColor(211, 47, 47))
+                Values = porDia.Select(g => g.Count()).ToArray(),
+                Name = "Calificaciones/día",
+                Fill = new SolidColorPaint(new SKColor(33, 150, 243, 80)),
+                Stroke = new SolidColorPaint(new SKColor(33, 150, 243)) { StrokeThickness = 3 },
+                GeometrySize = 8
             }
         };
+
+        // === DataGridView - Últimas calificaciones ===
+        var ultimas = calificaciones
+            .OrderByDescending(c => c.FechaHora)
+            .Take(10)
+            .Select(c => new
+            {
+                Fecha = c.FechaHora.ToString("dd/MM/yyyy HH:mm"),
+                Funcionario = c.Encargado is not null ? $"{c.Encargado.Nombre} {c.Encargado.Apellido}" : $"ID:{c.IdEncargado}",
+                Valor = c.Valor.ToString(),
+                Comentarios = c.Comentarios ?? "—",
+                IP = c.IpCliente ?? "—",
+                Dispositivo = c.DeviceFingerprint ?? "—"
+            })
+            .ToList();
+
+        dgvRecientes.DataSource = ultimas;
     }
 }
