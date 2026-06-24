@@ -29,7 +29,12 @@ public class EncargadoController : ControllerBase
             return MapError(resultado);
 
         var enc = resultado.Value!;
-        var frontendUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
+        // URL local y URL red (usar la IP del host del request)
+        var host = Request.Host.Host;
+        var networkUrl = host == "localhost" || host == "127.0.0.1"
+            ? $"http://localhost:5173/encuesta/{enc.TokenQR}"
+            : $"http://{host}:5173/encuesta/{enc.TokenQR}";
+
         return CreatedAtAction(nameof(ObtenerQR), new { id = enc.IdEncargado }, new
         {
             enc.IdEncargado,
@@ -37,7 +42,7 @@ public class EncargadoController : ControllerBase
             enc.Apellido,
             enc.TokenQR,
             urlEncuestaLocal = $"http://localhost:5173/encuesta/{enc.TokenQR}",
-            urlEncuestaRed = $"{frontendUrl}/encuesta/{enc.TokenQR}",
+            urlEncuestaRed = networkUrl,
             QRBase64 = enc.CodigoQR
         });
     }
@@ -103,15 +108,18 @@ public class EncargadoController : ControllerBase
 
         // Obtener el encargado actualizado para devolver el token y la URL
         var encResult = await _encargadoService.ObtenerPorIdAsync(id);
-        var frontendUrl = _config["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
         var token = encResult.Value?.TokenQR ?? "";
+        var host = Request.Host.Host;
+        var networkUrl = host == "localhost" || host == "127.0.0.1"
+            ? $"http://localhost:5173/encuesta/{token}"
+            : $"http://{host}:5173/encuesta/{token}";
 
         return Ok(new
         {
             qrBase64 = resultado.Value,
             tokenQR = token,
             urlEncuestaLocal = $"http://localhost:5173/encuesta/{token}",
-            urlEncuestaRed = $"{frontendUrl}/encuesta/{token}"
+            urlEncuestaRed = networkUrl
         });
     }
 

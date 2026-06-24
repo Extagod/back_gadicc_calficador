@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ApiEncuestaPrototipe")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+831e9ff239161a5752e6e415f69876df97ce16f8")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+6f07a1090ef0d41b7157ed7adf4472dca6caed51")]
 [assembly: System.Reflection.AssemblyProductAttribute("ApiEncuestaPrototipe")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ApiEncuestaPrototipe")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

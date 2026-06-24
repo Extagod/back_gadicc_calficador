@@ -1,5 +1,7 @@
 namespace Capa_Servicios;
 
+using System.Net;
+using System.Net.Sockets;
 using Capa_Abstracciones.Common;
 using Capa_Abstracciones.DTOs;
 using Capa_Abstracciones.Entities;
@@ -10,7 +12,8 @@ public class EncargadoService : IEncargadoService
 {
     private readonly IEncargadoRepository _encargadoRepository;
     private readonly IQRService _qrService;
-    private readonly string _frontendUrl;
+    private readonly string _frontendBaseUrl;
+    private readonly int _frontendPort;
 
     public EncargadoService(
         IEncargadoRepository encargadoRepository,
@@ -19,7 +22,35 @@ public class EncargadoService : IEncargadoService
     {
         _encargadoRepository = encargadoRepository;
         _qrService = qrService;
-        _frontendUrl = configuration["AppSettings:FrontendUrl"] ?? "http://localhost:5173";
+        _frontendPort = 5173;
+
+        // Si hay URL configurada explícitamente, usarla; si no, auto-detectar IP
+        var configUrl = configuration["AppSettings:FrontendUrl"];
+        if (!string.IsNullOrWhiteSpace(configUrl) && configUrl != "auto")
+        {
+            _frontendBaseUrl = configUrl;
+        }
+        else
+        {
+            var ip = ObtenerIpLocal();
+            _frontendBaseUrl = $"http://{ip}:{_frontendPort}";
+        }
+    }
+
+    private static string ObtenerIpLocal()
+    {
+        try
+        {
+            var host = Dns.GetHostEntry(Dns.GetHostName());
+            var ip = host.AddressList
+                .FirstOrDefault(a => a.AddressFamily == AddressFamily.InterNetwork
+                                  && !IPAddress.IsLoopback(a));
+            return ip?.ToString() ?? "localhost";
+        }
+        catch
+        {
+            return "localhost";
+        }
     }
 
     public async Task<ServiceResult<Encargado>> CrearEncargadoAsync(CrearEncargadoDto dto)
@@ -33,7 +64,7 @@ public class EncargadoService : IEncargadoService
         };
 
         encargado.TokenQR = Guid.NewGuid().ToString("N");
-        var urlEncuesta = $"{_frontendUrl}/encuesta/{encargado.TokenQR}";
+        var urlEncuesta = $"{_frontendBaseUrl}/encuesta/{encargado.TokenQR}";
         encargado.CodigoQR = _qrService.GenerarQRBase64(urlEncuesta);
 
         var resultado = await _encargadoRepository.AgregarAsync(encargado);
@@ -84,7 +115,7 @@ public class EncargadoService : IEncargadoService
             return ServiceResult<string>.NotFound($"Encargado con Id {id} no encontrado.");
 
         encargado.TokenQR = Guid.NewGuid().ToString("N");
-        var urlEncuesta = $"{_frontendUrl}/encuesta/{encargado.TokenQR}";
+        var urlEncuesta = $"{_frontendBaseUrl}/encuesta/{encargado.TokenQR}";
         encargado.CodigoQR = _qrService.GenerarQRBase64(urlEncuesta);
 
         await _encargadoRepository.ActualizarAsync(encargado);
