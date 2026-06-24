@@ -38,9 +38,9 @@ static class Program
             .Build();
         services.AddSingleton<IConfiguration>(configuration);
 
-        // EF Core + SQL Server
+        // EF Core + Oracle
         services.AddDbContext<AppDbContext>(options =>
-            options.UseSqlServer(connectionString));
+            options.UseOracle(connectionString));
 
         // Repositories
         services.AddScoped<IEncargadoRepository, EncargadoRepository>();

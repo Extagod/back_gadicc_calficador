@@ -4,9 +4,9 @@ using System.ComponentModel.DataAnnotations;
 
 public class CrearCalificacionDto
 {
-    [Required(ErrorMessage = "El campo IdEncargado es obligatorio.")]
-    [Range(1, int.MaxValue, ErrorMessage = "IdEncargado debe ser mayor a 0.")]
-    public int IdEncargado { get; set; }
+    [Required(ErrorMessage = "La cédula del empleado es obligatoria.")]
+    [StringLength(14, MinimumLength = 10, ErrorMessage = "La cédula debe tener entre 10 y 14 caracteres.")]
+    public string CedulaEmpleado { get; set; } = string.Empty;
 
     [Required(ErrorMessage = "El campo Calificacion es obligatorio.")]
     [MaxLength(20, ErrorMessage = "El campo Calificacion no puede exceder 20 caracteres.")]
