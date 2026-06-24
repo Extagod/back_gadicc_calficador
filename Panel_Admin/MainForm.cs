@@ -11,8 +11,8 @@ public partial class MainForm : Form
     private readonly IServiceProvider _serviceProvider;
     private readonly IEncargadoService _encargadoService;
     private readonly ICalificacionService _calificacionService;
-    private List<Encargado> _funcionarios = new();
-    private Encargado? _selectedFuncionario;
+    private List<Empleado> _funcionarios = new();
+    private Empleado? _selectedFuncionario;
 
     public MainForm(IServiceProvider serviceProvider)
     {
@@ -47,18 +47,20 @@ public partial class MainForm : Form
 
         if (filtro.Length >= 1)
         {
-            datos = datos.Where(f => f.Nombre.ToLower().Contains(filtro)
-                                  || f.Apellido.ToLower().Contains(filtro));
+            datos = datos.Where(f =>
+                (f.Persona?.PrimerNombre?.ToLower().Contains(filtro) ?? false) ||
+                (f.Persona?.PrimerApellido?.ToLower().Contains(filtro) ?? false) ||
+                f.CedulaRucPersona.ToLower().Contains(filtro));
         }
 
         dgvFuncionarios.DataSource = datos.Select(f => new
         {
-            f.IdEncargado,
-            f.Nombre,
-            f.Apellido,
-            f.Cargo,
-            f.Direccion,
-            QR = string.IsNullOrEmpty(f.CodigoQR) ? "❌" : "✅"
+            Cedula = f.CedulaRucPersona,
+            Nombre = f.Persona?.PrimerNombre ?? "",
+            Apellido = f.Persona?.PrimerApellido ?? "",
+            Cargo = f.Cargo ?? "",
+            Direccion = f.Persona?.Direccion ?? "",
+            QR = string.IsNullOrEmpty(f.EmpleadoQR?.CodigoQR) ? "❌" : "✅"
         }).ToList();
     }
 
@@ -103,10 +105,11 @@ public partial class MainForm : Form
 
         var datosActuales = new CrearEncargadoDto
         {
-            Nombre = _selectedFuncionario.Nombre,
-            Apellido = _selectedFuncionario.Apellido,
+            CedulaRucPersona = _selectedFuncionario.CedulaRucPersona,
+            Nombre = _selectedFuncionario.Persona?.PrimerNombre ?? "",
+            Apellido = _selectedFuncionario.Persona?.PrimerApellido ?? "",
             Cargo = _selectedFuncionario.Cargo,
-            Direccion = _selectedFuncionario.Direccion
+            Direccion = _selectedFuncionario.Persona?.Direccion
         };
 
         using var form = new FuncionarioForm(datosActuales);
@@ -115,7 +118,7 @@ public partial class MainForm : Form
             try
             {
                 var resultado = await _encargadoService.ActualizarEncargadoAsync(
-                    _selectedFuncionario.IdEncargado, form.Resultado);
+                    _selectedFuncionario.CedulaRucPersona, form.Resultado);
                 if (resultado.IsSuccess)
                 {
                     await CargarFuncionariosAsync();
@@ -142,8 +145,10 @@ public partial class MainForm : Form
             return;
         }
 
+        var nombre = _selectedFuncionario.Persona?.PrimerNombre ?? "";
+        var apellido = _selectedFuncionario.Persona?.PrimerApellido ?? "";
         var confirm = MessageBox.Show(
-            $"¿Está seguro de eliminar a {_selectedFuncionario.Nombre} {_selectedFuncionario.Apellido}?\n\nEsta acción eliminará también todas sus calificaciones.",
+            $"¿Está seguro de eliminar a {nombre} {apellido}?\n\nEsta acción eliminará también todas sus calificaciones.",
             "Confirmar Eliminación",
             MessageBoxButtons.YesNo,
             MessageBoxIcon.Warning);
@@ -152,9 +157,7 @@ public partial class MainForm : Form
         {
             try
             {
-                // Eliminar via SQL directamente ya que no tenemos un método Delete en el servicio
-                // Agreguemos soporte para eliminar
-                var resultado = await _encargadoService.EliminarEncargadoAsync(_selectedFuncionario.IdEncargado);
+                var resultado = await _encargadoService.EliminarEncargadoAsync(_selectedFuncionario.CedulaRucPersona);
                 if (resultado.IsSuccess)
                 {
                     _selectedFuncionario = null;
@@ -177,8 +180,8 @@ public partial class MainForm : Form
     {
         if (dgvFuncionarios.SelectedRows.Count > 0)
         {
-            var id = (int)dgvFuncionarios.SelectedRows[0].Cells["IdEncargado"].Value;
-            _selectedFuncionario = _funcionarios.FirstOrDefault(f => f.IdEncargado == id);
+            var cedula = dgvFuncionarios.SelectedRows[0].Cells["Cedula"].Value?.ToString();
+            _selectedFuncionario = _funcionarios.FirstOrDefault(f => f.CedulaRucPersona == cedula);
         }
     }
 
@@ -192,8 +195,8 @@ public partial class MainForm : Form
     {
         if (e.RowIndex < 0) return;
 
-        var id = (int)dgvFuncionarios.Rows[e.RowIndex].Cells["IdEncargado"].Value;
-        var funcionario = _funcionarios.FirstOrDefault(f => f.IdEncargado == id);
+        var cedula = dgvFuncionarios.Rows[e.RowIndex].Cells["Cedula"].Value?.ToString();
+        var funcionario = _funcionarios.FirstOrDefault(f => f.CedulaRucPersona == cedula);
         if (funcionario is null) return;
 
         using var form = new DetalleFuncionarioForm(funcionario, _serviceProvider);
@@ -222,23 +225,6 @@ public partial class MainForm : Form
         }
     }
 
-    private async Task CargarCalificacionesPorFuncionarioAsync(int idEncargado)
-    {
-        var resultado = await _calificacionService.ObtenerPorEncargadoAsync(idEncargado);
-        if (resultado.IsSuccess)
-        {
-            var calificaciones = resultado.Value!.ToList();
-            // Necesitamos el encargado para mostrar su nombre
-            var encResult = _funcionarios.FirstOrDefault(f => f.IdEncargado == idEncargado);
-            foreach (var c in calificaciones)
-            {
-                if (c.Encargado is null && encResult is not null)
-                    c.Encargado = encResult;
-            }
-            MostrarCalificaciones(calificaciones);
-        }
-    }
-
     private void MostrarCalificaciones(List<Calificacion> calificaciones)
     {
         if (calificaciones.Count == 0)
@@ -255,10 +241,10 @@ public partial class MainForm : Form
                 .Select(c => new
                 {
                     Fecha = c.FechaHora.ToString("dd/MM/yyyy HH:mm"),
-                    Funcionario = c.Encargado is not null
-                        ? $"{c.Encargado.Nombre} {c.Encargado.Apellido}"
-                        : $"ID: {c.IdEncargado}",
-                    Cargo = c.Encargado?.Cargo ?? "—",
+                    Funcionario = c.Empleado?.Persona != null
+                        ? $"{c.Empleado.Persona.PrimerNombre} {c.Empleado.Persona.PrimerApellido}"
+                        : c.CedulaRucPersona,
+                    Cargo = c.Empleado?.Cargo ?? "—",
                     Valor = c.Valor.ToString(),
                     c.Comentarios
                 }).ToList();
@@ -283,17 +269,12 @@ public partial class MainForm : Form
         // Si hay funcionario seleccionado, filtrar por ese funcionario
         if (_selectedFuncionario is not null)
         {
-            var resultado = await _calificacionService.ObtenerPorEncargadoYRangoAsync(
-                _selectedFuncionario.IdEncargado, dtpFechaInicio.Value, dtpFechaFin.Value);
+            var resultado = await _calificacionService.ObtenerPorEmpleadoYRangoAsync(
+                _selectedFuncionario.CedulaRucPersona, dtpFechaInicio.Value, dtpFechaFin.Value);
 
             if (resultado.IsSuccess)
             {
                 var calificaciones = resultado.Value!.ToList();
-                foreach (var c in calificaciones)
-                {
-                    if (c.Encargado is null)
-                        c.Encargado = _selectedFuncionario;
-                }
                 MostrarCalificaciones(calificaciones);
             }
         }

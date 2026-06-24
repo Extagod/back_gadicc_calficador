@@ -28,22 +28,22 @@ public class EncargadoController : ControllerBase
         if (!resultado.IsSuccess)
             return MapError(resultado);
 
-        var enc = resultado.Value!;
-        // URL local y URL red (usar la IP del host del request)
+        var emp = resultado.Value!;
+        var token = emp.EmpleadoQR?.TokenQR ?? "";
         var host = Request.Host.Host;
         var networkUrl = host == "localhost" || host == "127.0.0.1"
-            ? $"http://localhost:5173/encuesta/{enc.TokenQR}"
-            : $"http://{host}:5173/encuesta/{enc.TokenQR}";
+            ? $"http://localhost:5173/encuesta/{token}"
+            : $"http://{host}:5173/encuesta/{token}";
 
-        return CreatedAtAction(nameof(ObtenerQR), new { id = enc.IdEncargado }, new
+        return CreatedAtAction(nameof(ObtenerQR), new { cedula = emp.CedulaRucPersona }, new
         {
-            enc.IdEncargado,
-            enc.Nombre,
-            enc.Apellido,
-            enc.TokenQR,
-            urlEncuestaLocal = $"http://localhost:5173/encuesta/{enc.TokenQR}",
+            Cedula = emp.CedulaRucPersona,
+            Nombre = emp.Persona?.PrimerNombre,
+            Apellido = emp.Persona?.PrimerApellido,
+            TokenQR = token,
+            urlEncuestaLocal = $"http://localhost:5173/encuesta/{token}",
             urlEncuestaRed = networkUrl,
-            QRBase64 = enc.CodigoQR
+            QRBase64 = emp.EmpleadoQR?.CodigoQR
         });
     }
 
@@ -54,28 +54,29 @@ public class EncargadoController : ControllerBase
         if (!resultado.IsSuccess)
             return MapError(resultado);
 
-        var enc = resultado.Value!;
+        var emp = resultado.Value!;
         return Ok(new
         {
-            idEncargado = enc.IdEncargado,
-            nombre = enc.Nombre,
-            apellido = enc.Apellido,
-            cargo = enc.Cargo ?? ""
+            cedula = emp.CedulaRucPersona,
+            nombre = emp.Persona?.PrimerNombre ?? "",
+            apellido = emp.Persona?.PrimerApellido ?? "",
+            cargo = emp.Cargo ?? ""
         });
     }
 
-    [HttpGet("{id}/qr")]
-    public async Task<IActionResult> ObtenerQR(int id)
+    [HttpGet("{cedula}/qr")]
+    public async Task<IActionResult> ObtenerQR(string cedula)
     {
-        var resultado = await _encargadoService.ObtenerPorIdAsync(id);
+        var resultado = await _encargadoService.ObtenerPorCedulaAsync(cedula);
         if (!resultado.IsSuccess)
             return MapError(resultado);
 
-        var enc = resultado.Value!;
-        if (string.IsNullOrEmpty(enc.CodigoQR))
-            return NotFound(new { mensaje = "Este encargado no tiene QR generado." });
+        var emp = resultado.Value!;
+        var codigoQR = emp.EmpleadoQR?.CodigoQR;
+        if (string.IsNullOrEmpty(codigoQR))
+            return NotFound(new { mensaje = "Este empleado no tiene QR generado." });
 
-        var bytes = Convert.FromBase64String(enc.CodigoQR);
+        var bytes = Convert.FromBase64String(codigoQR);
         return File(bytes, "image/png");
     }
 
@@ -86,29 +87,49 @@ public class EncargadoController : ControllerBase
         return Ok(resultado.Value);
     }
 
-    [HttpPut("{id}")]
-    public async Task<IActionResult> ActualizarEncargado(int id, [FromBody] CrearEncargadoDto dto)
+    [HttpGet("{cedula}")]
+    public async Task<IActionResult> ObtenerPorCedula(string cedula)
+    {
+        var resultado = await _encargadoService.ObtenerPorCedulaAsync(cedula);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
+
+        var emp = resultado.Value!;
+        return Ok(new
+        {
+            cedula = emp.CedulaRucPersona,
+            nombre = emp.Persona?.PrimerNombre ?? "",
+            apellido = emp.Persona?.PrimerApellido ?? "",
+            cargo = emp.Cargo ?? "",
+            direccion = emp.Persona?.Direccion ?? "",
+            tokenQR = emp.EmpleadoQR?.TokenQR ?? "",
+            tieneQR = !string.IsNullOrEmpty(emp.EmpleadoQR?.CodigoQR)
+        });
+    }
+
+    [HttpPut("{cedula}")]
+    public async Task<IActionResult> ActualizarEncargado(string cedula, [FromBody] CrearEncargadoDto dto)
     {
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        var resultado = await _encargadoService.ActualizarEncargadoAsync(id, dto);
+        var resultado = await _encargadoService.ActualizarEncargadoAsync(cedula, dto);
         if (!resultado.IsSuccess)
             return MapError(resultado);
 
         return Ok(resultado.Value);
     }
 
-    [HttpPost("{id}/regenerar-qr")]
-    public async Task<IActionResult> RegenerarQR(int id)
+    [HttpPost("{cedula}/regenerar-qr")]
+    public async Task<IActionResult> RegenerarQR(string cedula)
     {
-        var resultado = await _encargadoService.RegenerarQRAsync(id);
+        var resultado = await _encargadoService.RegenerarQRAsync(cedula);
         if (!resultado.IsSuccess)
             return MapError(resultado);
 
-        // Obtener el encargado actualizado para devolver el token y la URL
-        var encResult = await _encargadoService.ObtenerPorIdAsync(id);
-        var token = encResult.Value?.TokenQR ?? "";
+        // Obtener el empleado actualizado para devolver el token y la URL
+        var encResult = await _encargadoService.ObtenerPorCedulaAsync(cedula);
+        var token = encResult.Value?.EmpleadoQR?.TokenQR ?? "";
         var host = Request.Host.Host;
         var networkUrl = host == "localhost" || host == "127.0.0.1"
             ? $"http://localhost:5173/encuesta/{token}"
@@ -121,6 +142,16 @@ public class EncargadoController : ControllerBase
             urlEncuestaLocal = $"http://localhost:5173/encuesta/{token}",
             urlEncuestaRed = networkUrl
         });
+    }
+
+    [HttpDelete("{cedula}")]
+    public async Task<IActionResult> EliminarEncargado(string cedula)
+    {
+        var resultado = await _encargadoService.EliminarEncargadoAsync(cedula);
+        if (!resultado.IsSuccess)
+            return MapError(resultado);
+
+        return Ok(new { mensaje = "Empleado eliminado correctamente." });
     }
 
     private IActionResult MapError<T>(ServiceResult<T> result)

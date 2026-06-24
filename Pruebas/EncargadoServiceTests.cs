@@ -29,8 +29,12 @@ public class EncargadoServiceTests
             .Returns("fakeBase64QRCode");
 
         _encargadoRepoMock
-            .Setup(r => r.AgregarAsync(It.IsAny<Encargado>()))
-            .ReturnsAsync((Encargado e) => { e.IdEncargado = 1; return e; });
+            .Setup(r => r.AgregarAsync(It.IsAny<Empleado>()))
+            .ReturnsAsync((Empleado e) => e);
+
+        _encargadoRepoMock
+            .Setup(r => r.GuardarQRAsync(It.IsAny<EmpleadoQR>()))
+            .Returns(Task.CompletedTask);
 
         _service = new EncargadoService(
             _encargadoRepoMock.Object,
@@ -39,10 +43,15 @@ public class EncargadoServiceTests
     }
 
     [Fact]
-    public async Task CrearEncargado_RetornaSuccessConTokenQR32HexChars()
+    public async Task CrearEncargado_RetornaSuccessConQRGenerado()
     {
         // Arrange
-        var dto = new CrearEncargadoDto { Nombre = "Juan", Apellido = "Pérez" };
+        var dto = new CrearEncargadoDto
+        {
+            CedulaRucPersona = "0102030405",
+            Nombre = "Juan",
+            Apellido = "Pérez"
+        };
 
         // Act
         var result = await _service.CrearEncargadoAsync(dto);
@@ -50,26 +59,32 @@ public class EncargadoServiceTests
         // Assert
         Assert.True(result.IsSuccess);
         Assert.NotNull(result.Value);
-        Assert.NotNull(result.Value!.TokenQR);
-        Assert.Equal(32, result.Value.TokenQR!.Length);
-        Assert.True(result.Value.TokenQR.All(c => "0123456789abcdef".Contains(c)));
+        Assert.Equal("0102030405", result.Value!.CedulaRucPersona);
+        // QR was saved
+        _encargadoRepoMock.Verify(r => r.GuardarQRAsync(It.Is<EmpleadoQR>(
+            qr => qr.TokenQR.Length == 32 && qr.CedulaRucPersona == "0102030405")), Times.Once);
     }
 
     [Fact]
     public async Task CrearEncargado_DosCreacionesConsecutivas_ProducenTokenQRDistintos()
     {
         // Arrange
-        var dto1 = new CrearEncargadoDto { Nombre = "Juan", Apellido = "Pérez" };
-        var dto2 = new CrearEncargadoDto { Nombre = "María", Apellido = "López" };
+        var dto1 = new CrearEncargadoDto { CedulaRucPersona = "0102030405", Nombre = "Juan", Apellido = "Pérez" };
+        var dto2 = new CrearEncargadoDto { CedulaRucPersona = "0605040302", Nombre = "María", Apellido = "López" };
+
+        var savedQRs = new List<EmpleadoQR>();
+        _encargadoRepoMock
+            .Setup(r => r.GuardarQRAsync(It.IsAny<EmpleadoQR>()))
+            .Callback<EmpleadoQR>(qr => savedQRs.Add(qr))
+            .Returns(Task.CompletedTask);
 
         // Act
-        var result1 = await _service.CrearEncargadoAsync(dto1);
-        var result2 = await _service.CrearEncargadoAsync(dto2);
+        await _service.CrearEncargadoAsync(dto1);
+        await _service.CrearEncargadoAsync(dto2);
 
         // Assert
-        Assert.True(result1.IsSuccess);
-        Assert.True(result2.IsSuccess);
-        Assert.NotEqual(result1.Value!.TokenQR, result2.Value!.TokenQR);
+        Assert.Equal(2, savedQRs.Count);
+        Assert.NotEqual(savedQRs[0].TokenQR, savedQRs[1].TokenQR);
     }
 
     [Fact]
@@ -78,7 +93,7 @@ public class EncargadoServiceTests
         // Arrange
         _encargadoRepoMock
             .Setup(r => r.ObtenerPorTokenQRAsync("tokeninexistente"))
-            .ReturnsAsync((Encargado?)null);
+            .ReturnsAsync((Empleado?)null);
 
         // Act
         var result = await _service.ObtenerPorTokenQRAsync("tokeninexistente");

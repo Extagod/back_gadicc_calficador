@@ -51,12 +51,42 @@ public class CalificacionController : ControllerBase
         return Ok(new { mensaje = "Calificación guardada correctamente." });
     }
 
-    [HttpGet("encargado/{idEncargado}")]
-    public async Task<IActionResult> ObtenerPorEncargado(int idEncargado)
+    [HttpGet("empleado/{cedula}")]
+    public async Task<IActionResult> ObtenerPorEmpleado(string cedula)
     {
-        var resultado = await _calificacionService.ObtenerPorEncargadoAsync(idEncargado);
+        var resultado = await _calificacionService.ObtenerPorEmpleadoAsync(cedula);
         if (!resultado.IsSuccess)
             return NotFound(new { mensaje = resultado.ErrorMessage });
+
+        return Ok(resultado.Value);
+    }
+
+    [HttpGet("empleado/{cedula}/rango")]
+    public async Task<IActionResult> ObtenerPorEmpleadoYRango(
+        string cedula,
+        [FromQuery] DateTime fechaInicio,
+        [FromQuery] DateTime fechaFin)
+    {
+        var resultado = await _calificacionService.ObtenerPorEmpleadoYRangoAsync(cedula, fechaInicio, fechaFin);
+        if (!resultado.IsSuccess)
+        {
+            return resultado.ErrorType switch
+            {
+                ServiceErrorType.NotFound => NotFound(new { mensaje = resultado.ErrorMessage }),
+                ServiceErrorType.Validation => BadRequest(new { mensaje = resultado.ErrorMessage }),
+                _ => StatusCode(500, new { mensaje = resultado.ErrorMessage })
+            };
+        }
+
+        return Ok(resultado.Value);
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> ObtenerTodas()
+    {
+        var resultado = await _calificacionService.ObtenerTodasAsync();
+        if (!resultado.IsSuccess)
+            return StatusCode(500, new { mensaje = resultado.ErrorMessage });
 
         return Ok(resultado.Value);
     }

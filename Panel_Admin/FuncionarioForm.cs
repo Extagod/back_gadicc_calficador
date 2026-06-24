@@ -14,6 +14,8 @@ public partial class FuncionarioForm : Form
 
         if (datosExistentes is not null)
         {
+            txtCedula.Text = datosExistentes.CedulaRucPersona;
+            txtCedula.ReadOnly = true; // No editar cédula en modo edición
             txtNombre.Text = datosExistentes.Nombre;
             txtApellido.Text = datosExistentes.Apellido;
             txtCargo.Text = datosExistentes.Cargo ?? "";
@@ -25,9 +27,20 @@ public partial class FuncionarioForm : Form
 
     private void BtnGuardar_Click(object? sender, EventArgs e)
     {
+        lblErrorCedula.Text = "";
         lblErrorNombre.Text = "";
         lblErrorApellido.Text = "";
 
+        if (string.IsNullOrWhiteSpace(txtCedula.Text))
+        {
+            lblErrorCedula.Text = "La cédula es obligatoria.";
+            return;
+        }
+        if (txtCedula.Text.Trim().Length < 10 || txtCedula.Text.Trim().Length > 14)
+        {
+            lblErrorCedula.Text = "La cédula debe tener entre 10 y 14 caracteres.";
+            return;
+        }
         if (string.IsNullOrWhiteSpace(txtNombre.Text))
         {
             lblErrorNombre.Text = "El nombre es obligatorio.";
@@ -41,6 +54,7 @@ public partial class FuncionarioForm : Form
 
         Resultado = new CrearEncargadoDto
         {
+            CedulaRucPersona = txtCedula.Text.Trim(),
             Nombre = txtNombre.Text.Trim(),
             Apellido = txtApellido.Text.Trim(),
             Cargo = string.IsNullOrWhiteSpace(txtCargo.Text) ? null : txtCargo.Text.Trim(),

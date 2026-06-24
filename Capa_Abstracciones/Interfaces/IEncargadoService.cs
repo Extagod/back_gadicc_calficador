@@ -6,11 +6,11 @@ using Capa_Abstracciones.Entities;
 
 public interface IEncargadoService
 {
-    Task<ServiceResult<Encargado>> CrearEncargadoAsync(CrearEncargadoDto dto);
-    Task<ServiceResult<Encargado>> ObtenerPorIdAsync(int id);
-    Task<ServiceResult<Encargado>> ObtenerPorTokenQRAsync(string tokenQR);
-    Task<ServiceResult<IEnumerable<Encargado>>> ObtenerTodosAsync();
-    Task<ServiceResult<Encargado>> ActualizarEncargadoAsync(int id, CrearEncargadoDto dto);
-    Task<ServiceResult<string>> RegenerarQRAsync(int id);
-    Task<ServiceResult<bool>> EliminarEncargadoAsync(int id);
+    Task<ServiceResult<Empleado>> CrearEncargadoAsync(CrearEncargadoDto dto);
+    Task<ServiceResult<Empleado>> ObtenerPorCedulaAsync(string cedula);
+    Task<ServiceResult<Empleado>> ObtenerPorTokenQRAsync(string tokenQR);
+    Task<ServiceResult<IEnumerable<Empleado>>> ObtenerTodosAsync();
+    Task<ServiceResult<Empleado>> ActualizarEncargadoAsync(string cedula, CrearEncargadoDto dto);
+    Task<ServiceResult<string>> RegenerarQRAsync(string cedula);
+    Task<ServiceResult<bool>> EliminarEncargadoAsync(string cedula);
 }

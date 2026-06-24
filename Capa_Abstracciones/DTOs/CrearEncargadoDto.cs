@@ -4,6 +4,10 @@ using System.ComponentModel.DataAnnotations;
 
 public class CrearEncargadoDto
 {
+    [Required(ErrorMessage = "La cédula es obligatoria.")]
+    [StringLength(14, MinimumLength = 10, ErrorMessage = "La cédula debe tener entre 10 y 14 caracteres.")]
+    public string CedulaRucPersona { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "El campo Nombre es obligatorio.")]
     [StringLength(100, MinimumLength = 1, ErrorMessage = "El Nombre debe tener entre 1 y 100 caracteres.")]
     public string Nombre { get; set; } = string.Empty;
@@ -15,6 +19,6 @@ public class CrearEncargadoDto
     [MaxLength(100, ErrorMessage = "El Cargo no puede exceder 100 caracteres.")]
     public string? Cargo { get; set; }
 
-    [MaxLength(200, ErrorMessage = "La Dirección no puede exceder 200 caracteres.")]
+    [MaxLength(300, ErrorMessage = "La Dirección no puede exceder 300 caracteres.")]
     public string? Direccion { get; set; }
 }

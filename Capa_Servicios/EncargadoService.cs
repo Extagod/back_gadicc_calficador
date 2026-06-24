@@ -13,7 +13,6 @@ public class EncargadoService : IEncargadoService
     private readonly IEncargadoRepository _encargadoRepository;
     private readonly IQRService _qrService;
     private readonly string _frontendBaseUrl;
-    private readonly int _frontendPort;
 
     public EncargadoService(
         IEncargadoRepository encargadoRepository,
@@ -22,9 +21,7 @@ public class EncargadoService : IEncargadoService
     {
         _encargadoRepository = encargadoRepository;
         _qrService = qrService;
-        _frontendPort = 5173;
 
-        // Si hay URL configurada explícitamente, usarla; si no, auto-detectar IP
         var configUrl = configuration["AppSettings:FrontendUrl"];
         if (!string.IsNullOrWhiteSpace(configUrl) && configUrl != "auto")
         {
@@ -33,7 +30,7 @@ public class EncargadoService : IEncargadoService
         else
         {
             var ip = ObtenerIpLocal();
-            _frontendBaseUrl = $"http://{ip}:{_frontendPort}";
+            _frontendBaseUrl = $"http://{ip}:5173";
         }
     }
 
@@ -47,88 +44,120 @@ public class EncargadoService : IEncargadoService
                                   && !IPAddress.IsLoopback(a));
             return ip?.ToString() ?? "localhost";
         }
-        catch
-        {
-            return "localhost";
-        }
+        catch { return "localhost"; }
     }
 
-    public async Task<ServiceResult<Encargado>> CrearEncargadoAsync(CrearEncargadoDto dto)
+    public async Task<ServiceResult<Empleado>> CrearEncargadoAsync(CrearEncargadoDto dto)
     {
-        var encargado = new Encargado
+        // Crear persona si no existe
+        var persona = new Persona
         {
-            Nombre = dto.Nombre.Trim(),
-            Apellido = dto.Apellido.Trim(),
-            Cargo = dto.Cargo?.Trim(),
-            Direccion = dto.Direccion?.Trim()
+            CedulaRucPersona = dto.CedulaRucPersona.Trim(),
+            PrimerNombre = dto.Nombre.Trim(),
+            PrimerApellido = dto.Apellido.Trim(),
+            Direccion = dto.Direccion?.Trim(),
+            Activo = 1
         };
 
-        encargado.TokenQR = Guid.NewGuid().ToString("N");
-        var urlEncuesta = $"{_frontendBaseUrl}/encuesta/{encargado.TokenQR}";
-        encargado.CodigoQR = _qrService.GenerarQRBase64(urlEncuesta);
+        var empleado = new Empleado
+        {
+            CedulaRucPersona = dto.CedulaRucPersona.Trim(),
+            Cargo = dto.Cargo?.Trim(),
+            EmpleadoActivo = 1,
+            Persona = persona
+        };
 
-        var resultado = await _encargadoRepository.AgregarAsync(encargado);
-        return ServiceResult<Encargado>.Success(resultado);
+        var resultado = await _encargadoRepository.AgregarAsync(empleado);
+
+        // Generar QR automáticamente
+        var tokenQR = Guid.NewGuid().ToString("N");
+        var urlEncuesta = $"{_frontendBaseUrl}/encuesta/{tokenQR}";
+        var codigoQR = _qrService.GenerarQRBase64(urlEncuesta);
+
+        var qr = new EmpleadoQR
+        {
+            CedulaRucPersona = empleado.CedulaRucPersona,
+            TokenQR = tokenQR,
+            CodigoQR = codigoQR,
+            FechaGeneracion = DateTime.UtcNow,
+            Activo = 1
+        };
+        await _encargadoRepository.GuardarQRAsync(qr);
+        empleado.EmpleadoQR = qr;
+
+        return ServiceResult<Empleado>.Success(resultado);
     }
 
-    public async Task<ServiceResult<Encargado>> ObtenerPorIdAsync(int id)
+    public async Task<ServiceResult<Empleado>> ObtenerPorCedulaAsync(string cedula)
     {
-        var encargado = await _encargadoRepository.ObtenerPorIdAsync(id);
-        if (encargado is null)
-            return ServiceResult<Encargado>.NotFound($"Encargado con Id {id} no encontrado.");
-        return ServiceResult<Encargado>.Success(encargado);
+        var empleado = await _encargadoRepository.ObtenerPorCedulaAsync(cedula);
+        if (empleado is null)
+            return ServiceResult<Empleado>.NotFound($"Empleado con cédula {cedula} no encontrado.");
+        return ServiceResult<Empleado>.Success(empleado);
     }
 
-    public async Task<ServiceResult<Encargado>> ObtenerPorTokenQRAsync(string tokenQR)
+    public async Task<ServiceResult<Empleado>> ObtenerPorTokenQRAsync(string tokenQR)
     {
-        var encargado = await _encargadoRepository.ObtenerPorTokenQRAsync(tokenQR);
-        if (encargado is null)
-            return ServiceResult<Encargado>.NotFound("El código QR no es válido o ya no está disponible.");
-        return ServiceResult<Encargado>.Success(encargado);
+        var empleado = await _encargadoRepository.ObtenerPorTokenQRAsync(tokenQR);
+        if (empleado is null)
+            return ServiceResult<Empleado>.NotFound("El código QR no es válido o ya no está disponible.");
+        return ServiceResult<Empleado>.Success(empleado);
     }
 
-    public async Task<ServiceResult<IEnumerable<Encargado>>> ObtenerTodosAsync()
+    public async Task<ServiceResult<IEnumerable<Empleado>>> ObtenerTodosAsync()
     {
-        var encargados = await _encargadoRepository.ObtenerTodosAsync();
-        return ServiceResult<IEnumerable<Encargado>>.Success(encargados);
+        var empleados = await _encargadoRepository.ObtenerTodosAsync();
+        return ServiceResult<IEnumerable<Empleado>>.Success(empleados);
     }
 
-    public async Task<ServiceResult<Encargado>> ActualizarEncargadoAsync(int id, CrearEncargadoDto dto)
+    public async Task<ServiceResult<Empleado>> ActualizarEncargadoAsync(string cedula, CrearEncargadoDto dto)
     {
-        var encargado = await _encargadoRepository.ObtenerPorIdAsync(id);
-        if (encargado is null)
-            return ServiceResult<Encargado>.NotFound($"Encargado con Id {id} no encontrado.");
+        var empleado = await _encargadoRepository.ObtenerPorCedulaAsync(cedula);
+        if (empleado is null)
+            return ServiceResult<Empleado>.NotFound($"Empleado con cédula {cedula} no encontrado.");
 
-        encargado.Nombre = dto.Nombre.Trim();
-        encargado.Apellido = dto.Apellido.Trim();
-        encargado.Cargo = dto.Cargo?.Trim();
-        encargado.Direccion = dto.Direccion?.Trim();
+        if (empleado.Persona is not null)
+        {
+            empleado.Persona.PrimerNombre = dto.Nombre.Trim();
+            empleado.Persona.PrimerApellido = dto.Apellido.Trim();
+            empleado.Persona.Direccion = dto.Direccion?.Trim();
+        }
+        empleado.Cargo = dto.Cargo?.Trim();
 
-        await _encargadoRepository.ActualizarAsync(encargado);
-        return ServiceResult<Encargado>.Success(encargado);
+        await _encargadoRepository.ActualizarAsync(empleado);
+        return ServiceResult<Empleado>.Success(empleado);
     }
 
-    public async Task<ServiceResult<string>> RegenerarQRAsync(int id)
+    public async Task<ServiceResult<string>> RegenerarQRAsync(string cedula)
     {
-        var encargado = await _encargadoRepository.ObtenerPorIdAsync(id);
-        if (encargado is null)
-            return ServiceResult<string>.NotFound($"Encargado con Id {id} no encontrado.");
+        var empleado = await _encargadoRepository.ObtenerPorCedulaAsync(cedula);
+        if (empleado is null)
+            return ServiceResult<string>.NotFound($"Empleado con cédula {cedula} no encontrado.");
 
-        encargado.TokenQR = Guid.NewGuid().ToString("N");
-        var urlEncuesta = $"{_frontendBaseUrl}/encuesta/{encargado.TokenQR}";
-        encargado.CodigoQR = _qrService.GenerarQRBase64(urlEncuesta);
+        var tokenQR = Guid.NewGuid().ToString("N");
+        var urlEncuesta = $"{_frontendBaseUrl}/encuesta/{tokenQR}";
+        var codigoQR = _qrService.GenerarQRBase64(urlEncuesta);
 
-        await _encargadoRepository.ActualizarAsync(encargado);
-        return ServiceResult<string>.Success(encargado.CodigoQR);
+        var qr = new EmpleadoQR
+        {
+            CedulaRucPersona = cedula,
+            TokenQR = tokenQR,
+            CodigoQR = codigoQR,
+            FechaGeneracion = DateTime.UtcNow,
+            Activo = 1
+        };
+        await _encargadoRepository.GuardarQRAsync(qr);
+
+        return ServiceResult<string>.Success(codigoQR);
     }
 
-    public async Task<ServiceResult<bool>> EliminarEncargadoAsync(int id)
+    public async Task<ServiceResult<bool>> EliminarEncargadoAsync(string cedula)
     {
-        var encargado = await _encargadoRepository.ObtenerPorIdAsync(id);
-        if (encargado is null)
-            return ServiceResult<bool>.NotFound($"Encargado con Id {id} no encontrado.");
+        var empleado = await _encargadoRepository.ObtenerPorCedulaAsync(cedula);
+        if (empleado is null)
+            return ServiceResult<bool>.NotFound($"Empleado con cédula {cedula} no encontrado.");
 
-        await _encargadoRepository.EliminarAsync(encargado);
+        await _encargadoRepository.EliminarAsync(empleado);
         return ServiceResult<bool>.Success(true);
     }
 }

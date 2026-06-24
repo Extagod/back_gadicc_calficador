@@ -8,9 +8,9 @@ namespace Panel_Admin;
 public partial class DetalleFuncionarioForm : Form
 {
     private readonly IEncargadoService _encargadoService;
-    private Encargado _funcionario;
+    private Empleado _funcionario;
 
-    public DetalleFuncionarioForm(Encargado funcionario, IServiceProvider serviceProvider)
+    public DetalleFuncionarioForm(Empleado funcionario, IServiceProvider serviceProvider)
     {
         _funcionario = funcionario;
         var scope = serviceProvider.CreateScope();
@@ -21,15 +21,17 @@ public partial class DetalleFuncionarioForm : Form
 
     private void CargarDatos()
     {
-        lblNombreValor.Text = _funcionario.Nombre;
-        lblApellidoValor.Text = _funcionario.Apellido;
+        lblCedulaValor.Text = _funcionario.CedulaRucPersona;
+        lblNombreValor.Text = _funcionario.Persona?.PrimerNombre ?? "—";
+        lblApellidoValor.Text = _funcionario.Persona?.PrimerApellido ?? "—";
         lblCargoValor.Text = _funcionario.Cargo ?? "—";
-        lblDireccionValor.Text = _funcionario.Direccion ?? "—";
-        lblTokenValor.Text = _funcionario.TokenQR ?? "Sin generar";
+        lblDireccionValor.Text = _funcionario.Persona?.Direccion ?? "—";
+        lblTokenValor.Text = _funcionario.EmpleadoQR?.TokenQR ?? "Sin generar";
 
-        if (!string.IsNullOrEmpty(_funcionario.CodigoQR))
+        var codigoQR = _funcionario.EmpleadoQR?.CodigoQR;
+        if (!string.IsNullOrEmpty(codigoQR))
         {
-            var bytes = Convert.FromBase64String(_funcionario.CodigoQR);
+            var bytes = Convert.FromBase64String(codigoQR);
             using var ms = new MemoryStream(bytes);
             picQR.Image = Image.FromStream(ms);
             btnRegenerarQR.Text = "Regenerar QR";
@@ -43,11 +45,11 @@ public partial class DetalleFuncionarioForm : Form
 
     private async void BtnRegenerarQR_Click(object? sender, EventArgs e)
     {
-        var resultado = await _encargadoService.RegenerarQRAsync(_funcionario.IdEncargado);
+        var resultado = await _encargadoService.RegenerarQRAsync(_funcionario.CedulaRucPersona);
         if (resultado.IsSuccess)
         {
             // Actualizar datos locales
-            var encResult = await _encargadoService.ObtenerPorIdAsync(_funcionario.IdEncargado);
+            var encResult = await _encargadoService.ObtenerPorCedulaAsync(_funcionario.CedulaRucPersona);
             if (encResult.IsSuccess)
                 _funcionario = encResult.Value!;
 
@@ -55,7 +57,7 @@ public partial class DetalleFuncionarioForm : Form
             using var ms = new MemoryStream(bytes);
             picQR.Image = Image.FromStream(ms);
             btnRegenerarQR.Text = "Regenerar QR";
-            lblTokenValor.Text = _funcionario.TokenQR ?? "";
+            lblTokenValor.Text = _funcionario.EmpleadoQR?.TokenQR ?? "";
         }
         else
         {
@@ -67,10 +69,12 @@ public partial class DetalleFuncionarioForm : Form
     {
         if (picQR.Image is null) return;
 
+        var nombre = _funcionario.Persona?.PrimerNombre ?? "funcionario";
+        var apellido = _funcionario.Persona?.PrimerApellido ?? "";
         using var dialog = new SaveFileDialog
         {
             Filter = "PNG Image|*.png",
-            FileName = $"{_funcionario.Apellido}_{_funcionario.Nombre}_QR.png"
+            FileName = $"{apellido}_{nombre}_QR.png"
         };
 
         if (dialog.ShowDialog() == DialogResult.OK)

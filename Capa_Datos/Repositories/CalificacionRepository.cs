@@ -20,26 +20,27 @@ public class CalificacionRepository : ICalificacionRepository
         return calificacion;
     }
 
-    public async Task<IEnumerable<Calificacion>> ObtenerPorEncargadoIdAsync(int idEncargado)
+    public async Task<IEnumerable<Calificacion>> ObtenerPorEmpleadoAsync(string cedula)
         => await _context.Calificaciones
-            .Where(c => c.IdEncargado == idEncargado)
+            .Where(c => c.CedulaRucPersona == cedula)
             .OrderByDescending(c => c.FechaHora)
             .AsNoTracking()
             .ToListAsync();
 
-    public async Task<IEnumerable<Calificacion>> ObtenerPorEncargadoYRangoFechasAsync(
-        int idEncargado, DateTime fechaInicio, DateTime fechaFin)
+    public async Task<IEnumerable<Calificacion>> ObtenerPorEmpleadoYRangoFechasAsync(
+        string cedula, DateTime fechaInicio, DateTime fechaFin)
         => await _context.Calificaciones
-            .Where(c => c.IdEncargado == idEncargado
+            .Where(c => c.CedulaRucPersona == cedula
                      && c.FechaHora >= fechaInicio
                      && c.FechaHora <= fechaFin)
             .OrderByDescending(c => c.FechaHora)
             .AsNoTracking()
             .ToListAsync();
 
-    public async Task<IEnumerable<Calificacion>> ObtenerTodasConEncargadoAsync()
+    public async Task<IEnumerable<Calificacion>> ObtenerTodasConEmpleadoAsync()
         => await _context.Calificaciones
-            .Include(c => c.Encargado)
+            .Include(c => c.Empleado)
+                .ThenInclude(e => e.Persona)
             .OrderByDescending(c => c.FechaHora)
             .AsNoTracking()
             .ToListAsync();

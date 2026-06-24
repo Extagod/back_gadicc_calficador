@@ -51,17 +51,18 @@ public partial class DashboardForm : Form
         lblCardMala.Text = mala.ToString();
         lblCardFuncionarios.Text = funcionarios.Count.ToString();
 
-        // === Gráfica de Donut === (removida)
-
         // === Gráfica de Barras por funcionario ===
         var porFuncionario = calificaciones
-            .GroupBy(c => c.IdEncargado)
+            .GroupBy(c => c.CedulaRucPersona)
             .Select(g =>
             {
-                var func = funcionarios.FirstOrDefault(f => f.IdEncargado == g.Key);
+                var func = funcionarios.FirstOrDefault(f => f.CedulaRucPersona == g.Key);
+                var nombre = func?.Persona != null
+                    ? $"{func.Persona.PrimerNombre} {func.Persona.PrimerApellido}"
+                    : g.Key;
                 return new
                 {
-                    Nombre = func is not null ? $"{func.Nombre} {func.Apellido}" : $"ID:{g.Key}",
+                    Nombre = nombre,
                     Excelente = g.Count(c => c.Valor == ValorCalificacion.Excelente),
                     Buena = g.Count(c => c.Valor == ValorCalificacion.Buena),
                     Regular = g.Count(c => c.Valor == ValorCalificacion.Regular),
@@ -106,14 +107,21 @@ public partial class DashboardForm : Form
         var ultimas = calificaciones
             .OrderByDescending(c => c.FechaHora)
             .Take(10)
-            .Select(c => new
+            .Select(c =>
             {
-                Fecha = c.FechaHora.ToString("dd/MM/yyyy HH:mm"),
-                Funcionario = c.Encargado is not null ? $"{c.Encargado.Nombre} {c.Encargado.Apellido}" : $"ID:{c.IdEncargado}",
-                Valor = c.Valor.ToString(),
-                Comentarios = c.Comentarios ?? "—",
-                IP = c.IpCliente ?? "—",
-                Dispositivo = c.DeviceFingerprint ?? "—"
+                var func = funcionarios.FirstOrDefault(f => f.CedulaRucPersona == c.CedulaRucPersona);
+                var nombreFunc = func?.Persona != null
+                    ? $"{func.Persona.PrimerNombre} {func.Persona.PrimerApellido}"
+                    : c.CedulaRucPersona;
+                return new
+                {
+                    Fecha = c.FechaHora.ToString("dd/MM/yyyy HH:mm"),
+                    Funcionario = nombreFunc,
+                    Valor = c.Valor.ToString(),
+                    Comentarios = c.Comentarios ?? "—",
+                    IP = c.IpCliente ?? "—",
+                    Dispositivo = c.DeviceFingerprint ?? "—"
+                };
             })
             .ToList();
 

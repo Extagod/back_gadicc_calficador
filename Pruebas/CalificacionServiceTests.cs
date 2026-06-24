@@ -30,12 +30,17 @@ public class CalificacionServiceTests
     public async Task CrearCalificacion_ConValorValido_RetornaSuccess(string valor)
     {
         // Arrange
-        var dto = new CrearCalificacionDto { IdEncargado = 1, Calificacion = valor };
-        var encargado = new Encargado { IdEncargado = 1, Nombre = "Juan", Apellido = "Pérez" };
+        var cedula = "0102030405";
+        var dto = new CrearCalificacionDto { CedulaEmpleado = cedula, Calificacion = valor };
+        var empleado = new Empleado
+        {
+            CedulaRucPersona = cedula,
+            Persona = new Persona { CedulaRucPersona = cedula, PrimerNombre = "Juan", PrimerApellido = "Pérez" }
+        };
 
         _encargadoRepoMock
-            .Setup(r => r.ObtenerPorIdAsync(1))
-            .ReturnsAsync(encargado);
+            .Setup(r => r.ObtenerPorCedulaAsync(cedula))
+            .ReturnsAsync(empleado);
 
         _calificacionRepoMock
             .Setup(r => r.AgregarAsync(It.IsAny<Calificacion>()))
@@ -54,7 +59,7 @@ public class CalificacionServiceTests
     public async Task CrearCalificacion_ConValorInvalido_RetornaValidationError()
     {
         // Arrange
-        var dto = new CrearCalificacionDto { IdEncargado = 1, Calificacion = "Invalido" };
+        var dto = new CrearCalificacionDto { CedulaEmpleado = "0102030405", Calificacion = "Invalido" };
 
         // Act
         var result = await _service.CrearCalificacionAsync(dto);
@@ -73,7 +78,7 @@ public class CalificacionServiceTests
     public async Task CrearCalificacion_ConValorVacio_RetornaValidationErrorObligatorio()
     {
         // Arrange
-        var dto = new CrearCalificacionDto { IdEncargado = 1, Calificacion = "" };
+        var dto = new CrearCalificacionDto { CedulaEmpleado = "0102030405", Calificacion = "" };
 
         // Act
         var result = await _service.CrearCalificacionAsync(dto);
@@ -85,14 +90,15 @@ public class CalificacionServiceTests
     }
 
     [Fact]
-    public async Task CrearCalificacion_ConEncargadoInexistente_RetornaNotFound()
+    public async Task CrearCalificacion_ConEmpleadoInexistente_RetornaNotFound()
     {
         // Arrange
-        var dto = new CrearCalificacionDto { IdEncargado = 999, Calificacion = "Buena" };
+        var cedula = "9999999999";
+        var dto = new CrearCalificacionDto { CedulaEmpleado = cedula, Calificacion = "Buena" };
 
         _encargadoRepoMock
-            .Setup(r => r.ObtenerPorIdAsync(999))
-            .ReturnsAsync((Encargado?)null);
+            .Setup(r => r.ObtenerPorCedulaAsync(cedula))
+            .ReturnsAsync((Empleado?)null);
 
         // Act
         var result = await _service.CrearCalificacionAsync(dto);

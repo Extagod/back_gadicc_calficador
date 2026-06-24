@@ -76,19 +76,28 @@ public class PanelLogicTests
 
         configMock.Setup(c => c["AppSettings:FrontendUrl"]).Returns("http://localhost:5173");
         qrServiceMock.Setup(q => q.GenerarQRBase64(It.IsAny<string>())).Returns("base64QR");
-        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Encargado>()))
-            .ReturnsAsync((Encargado e) => { e.IdEncargado = 1; return e; });
+        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Empleado>()))
+            .ReturnsAsync((Empleado e) => e);
+        encargadoRepoMock.Setup(r => r.GuardarQRAsync(It.IsAny<EmpleadoQR>()))
+            .Returns(Task.CompletedTask);
 
         var service = new EncargadoService(encargadoRepoMock.Object, qrServiceMock.Object, configMock.Object);
-        var dto = new CrearEncargadoDto { Nombre = "Carlos", Apellido = "Gómez", Cargo = "Atención" };
+        var dto = new CrearEncargadoDto
+        {
+            CedulaRucPersona = "0102030405",
+            Nombre = "Carlos",
+            Apellido = "Gómez",
+            Cargo = "Atención"
+        };
 
         // Act
         var result = await service.CrearEncargadoAsync(dto);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.Equal("Carlos", result.Value!.Nombre);
-        Assert.Equal("Gómez", result.Value.Apellido);
+        Assert.Equal("0102030405", result.Value!.CedulaRucPersona);
+        Assert.Equal("Carlos", result.Value.Persona?.PrimerNombre);
+        Assert.Equal("Gómez", result.Value.Persona?.PrimerApellido);
     }
 
     [Fact]
@@ -101,11 +110,13 @@ public class PanelLogicTests
 
         configMock.Setup(c => c["AppSettings:FrontendUrl"]).Returns("http://localhost:5173");
         qrServiceMock.Setup(q => q.GenerarQRBase64(It.IsAny<string>())).Returns("base64QR");
-        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Encargado>()))
-            .ReturnsAsync((Encargado e) => { e.IdEncargado = 1; return e; });
+        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Empleado>()))
+            .ReturnsAsync((Empleado e) => e);
+        encargadoRepoMock.Setup(r => r.GuardarQRAsync(It.IsAny<EmpleadoQR>()))
+            .Returns(Task.CompletedTask);
 
         var service = new EncargadoService(encargadoRepoMock.Object, qrServiceMock.Object, configMock.Object);
-        var dto = new CrearEncargadoDto { Nombre = "  ", Apellido = "López" };
+        var dto = new CrearEncargadoDto { CedulaRucPersona = "0102030405", Nombre = "  ", Apellido = "López" };
 
         // Act - The service trims the value. In the full stack, validation would
         // happen at the UI layer (Panel_Admin) before reaching the service.
@@ -113,7 +124,7 @@ public class PanelLogicTests
 
         // Assert - Service processes the request; Panel_Admin handles empty validation
         Assert.True(result.IsSuccess);
-        Assert.Equal("", result.Value!.Nombre); // Trimmed whitespace becomes empty
+        Assert.Equal("", result.Value!.Persona?.PrimerNombre); // Trimmed whitespace becomes empty
     }
 
     #endregion
@@ -121,7 +132,7 @@ public class PanelLogicTests
     #region QR Generation Tests
 
     [Fact]
-    public async Task GeneracionQR_Produce32HexCharTokenQRYCodigoQRNoVacio()
+    public async Task GeneracionQR_ProduceTokenQR32HexCharsYCodigoQRNoVacio()
     {
         // Arrange
         var encargadoRepoMock = new Mock<IEncargadoRepository>();
@@ -130,21 +141,26 @@ public class PanelLogicTests
 
         configMock.Setup(c => c["AppSettings:FrontendUrl"]).Returns("http://localhost:5173");
         qrServiceMock.Setup(q => q.GenerarQRBase64(It.IsAny<string>())).Returns("someBase64Content");
-        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Encargado>()))
-            .ReturnsAsync((Encargado e) => { e.IdEncargado = 1; return e; });
+        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Empleado>()))
+            .ReturnsAsync((Empleado e) => e);
+
+        EmpleadoQR? savedQR = null;
+        encargadoRepoMock.Setup(r => r.GuardarQRAsync(It.IsAny<EmpleadoQR>()))
+            .Callback<EmpleadoQR>(qr => savedQR = qr)
+            .Returns(Task.CompletedTask);
 
         var service = new EncargadoService(encargadoRepoMock.Object, qrServiceMock.Object, configMock.Object);
-        var dto = new CrearEncargadoDto { Nombre = "Ana", Apellido = "Martínez" };
+        var dto = new CrearEncargadoDto { CedulaRucPersona = "0102030405", Nombre = "Ana", Apellido = "Martínez" };
 
         // Act
         var result = await service.CrearEncargadoAsync(dto);
 
         // Assert
         Assert.True(result.IsSuccess);
-        Assert.NotNull(result.Value!.TokenQR);
-        Assert.Equal(32, result.Value.TokenQR!.Length);
-        Assert.True(result.Value.TokenQR.All(c => "0123456789abcdef".Contains(c)));
-        Assert.False(string.IsNullOrEmpty(result.Value.CodigoQR));
+        Assert.NotNull(savedQR);
+        Assert.Equal(32, savedQR!.TokenQR.Length);
+        Assert.True(savedQR.TokenQR.All(c => "0123456789abcdef".Contains(c)));
+        Assert.False(string.IsNullOrEmpty(savedQR.CodigoQR));
     }
 
     [Fact]
@@ -157,17 +173,23 @@ public class PanelLogicTests
 
         configMock.Setup(c => c["AppSettings:FrontendUrl"]).Returns("http://localhost:5173");
         qrServiceMock.Setup(q => q.GenerarQRBase64(It.IsAny<string>())).Returns("base64QR");
-        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Encargado>()))
-            .ReturnsAsync((Encargado e) => { e.IdEncargado = 1; return e; });
+        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Empleado>()))
+            .ReturnsAsync((Empleado e) => e);
+
+        var savedQRs = new List<EmpleadoQR>();
+        encargadoRepoMock.Setup(r => r.GuardarQRAsync(It.IsAny<EmpleadoQR>()))
+            .Callback<EmpleadoQR>(qr => savedQRs.Add(qr))
+            .Returns(Task.CompletedTask);
 
         var service = new EncargadoService(encargadoRepoMock.Object, qrServiceMock.Object, configMock.Object);
 
         // Act
-        var result1 = await service.CrearEncargadoAsync(new CrearEncargadoDto { Nombre = "A", Apellido = "B" });
-        var result2 = await service.CrearEncargadoAsync(new CrearEncargadoDto { Nombre = "C", Apellido = "D" });
+        await service.CrearEncargadoAsync(new CrearEncargadoDto { CedulaRucPersona = "0102030405", Nombre = "A", Apellido = "B" });
+        await service.CrearEncargadoAsync(new CrearEncargadoDto { CedulaRucPersona = "0605040302", Nombre = "C", Apellido = "D" });
 
         // Assert
-        Assert.NotEqual(result1.Value!.TokenQR, result2.Value!.TokenQR);
+        Assert.Equal(2, savedQRs.Count);
+        Assert.NotEqual(savedQRs[0].TokenQR, savedQRs[1].TokenQR);
     }
 
     #endregion
@@ -181,26 +203,24 @@ public class PanelLogicTests
         var calificacionRepoMock = new Mock<ICalificacionRepository>();
         var encargadoRepoMock = new Mock<IEncargadoRepository>();
 
-        var encargado = new Encargado { IdEncargado = 1, Nombre = "Test", Apellido = "User" };
-        encargadoRepoMock.Setup(r => r.ObtenerPorIdAsync(1)).ReturnsAsync(encargado);
-
+        var cedula = "0102030405";
         var fechaInicio = new DateTime(2024, 1, 1);
         var fechaFin = new DateTime(2024, 1, 31);
 
         var calificacionesFiltradas = new List<Calificacion>
         {
-            new() { IdCalificacion = 1, IdEncargado = 1, Valor = ValorCalificacion.Excelente, FechaHora = new DateTime(2024, 1, 15) },
-            new() { IdCalificacion = 2, IdEncargado = 1, Valor = ValorCalificacion.Buena, FechaHora = new DateTime(2024, 1, 20) }
+            new() { IdCalificacion = 1, CedulaRucPersona = cedula, Valor = ValorCalificacion.Excelente, FechaHora = new DateTime(2024, 1, 15) },
+            new() { IdCalificacion = 2, CedulaRucPersona = cedula, Valor = ValorCalificacion.Buena, FechaHora = new DateTime(2024, 1, 20) }
         };
 
         calificacionRepoMock
-            .Setup(r => r.ObtenerPorEncargadoYRangoFechasAsync(1, fechaInicio, fechaFin))
+            .Setup(r => r.ObtenerPorEmpleadoYRangoFechasAsync(cedula, fechaInicio, fechaFin))
             .ReturnsAsync(calificacionesFiltradas);
 
         var service = new CalificacionService(calificacionRepoMock.Object, encargadoRepoMock.Object);
 
         // Act
-        var result = await service.ObtenerPorEncargadoYRangoAsync(1, fechaInicio, fechaFin);
+        var result = await service.ObtenerPorEmpleadoYRangoAsync(cedula, fechaInicio, fechaFin);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -219,20 +239,18 @@ public class PanelLogicTests
         var calificacionRepoMock = new Mock<ICalificacionRepository>();
         var encargadoRepoMock = new Mock<IEncargadoRepository>();
 
-        var encargado = new Encargado { IdEncargado = 1, Nombre = "Test", Apellido = "User" };
-        encargadoRepoMock.Setup(r => r.ObtenerPorIdAsync(1)).ReturnsAsync(encargado);
-
+        var cedula = "0102030405";
         var fechaInicio = new DateTime(2025, 6, 1);
         var fechaFin = new DateTime(2025, 6, 30);
 
         calificacionRepoMock
-            .Setup(r => r.ObtenerPorEncargadoYRangoFechasAsync(1, fechaInicio, fechaFin))
+            .Setup(r => r.ObtenerPorEmpleadoYRangoFechasAsync(cedula, fechaInicio, fechaFin))
             .ReturnsAsync(new List<Calificacion>());
 
         var service = new CalificacionService(calificacionRepoMock.Object, encargadoRepoMock.Object);
 
         // Act
-        var result = await service.ObtenerPorEncargadoYRangoAsync(1, fechaInicio, fechaFin);
+        var result = await service.ObtenerPorEmpleadoYRangoAsync(cedula, fechaInicio, fechaFin);
 
         // Assert
         Assert.True(result.IsSuccess);
@@ -252,11 +270,11 @@ public class PanelLogicTests
         var configMock = new Mock<IConfiguration>();
 
         configMock.Setup(c => c["AppSettings:FrontendUrl"]).Returns("http://localhost:5173");
-        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Encargado>()))
+        encargadoRepoMock.Setup(r => r.AgregarAsync(It.IsAny<Empleado>()))
             .ThrowsAsync(new InvalidOperationException("Database connection failed"));
 
         var service = new EncargadoService(encargadoRepoMock.Object, qrServiceMock.Object, configMock.Object);
-        var dto = new CrearEncargadoDto { Nombre = "Test", Apellido = "Test" };
+        var dto = new CrearEncargadoDto { CedulaRucPersona = "0102030405", Nombre = "Test", Apellido = "Test" };
 
         // Act & Assert - Verify the exception propagates (would be caught by middleware/UI)
         await Assert.ThrowsAsync<InvalidOperationException>(

@@ -10,6 +10,7 @@
         "dependencies": {
           "Capa_Abstracciones": "1.0.0",
           "Capa_Servicios": "1.0.0",
+          "Microsoft.Extensions.Configuration.Abstractions": "8.0.0",
           "Microsoft.NET.Test.Sdk": "17.11.1",
           "Moq": "4.20.72",
           "xunit": "2.7.1"

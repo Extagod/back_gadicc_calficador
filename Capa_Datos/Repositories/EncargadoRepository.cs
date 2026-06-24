@@ -13,32 +13,71 @@ public class EncargadoRepository : IEncargadoRepository
         _context = context;
     }
 
-    public async Task<Encargado?> ObtenerPorIdAsync(int id)
-        => await _context.Encargados.FindAsync(id);
+    public async Task<Empleado?> ObtenerPorCedulaAsync(string cedula)
+        => await _context.Empleados
+            .Include(e => e.Persona)
+            .Include(e => e.EmpleadoQR)
+            .FirstOrDefaultAsync(e => e.CedulaRucPersona == cedula);
 
-    public async Task<Encargado?> ObtenerPorTokenQRAsync(string tokenQR)
-        => await _context.Encargados
-            .FirstOrDefaultAsync(e => e.TokenQR == tokenQR);
-
-    public async Task<IEnumerable<Encargado>> ObtenerTodosAsync()
-        => await _context.Encargados.AsNoTracking().ToListAsync();
-
-    public async Task<Encargado> AgregarAsync(Encargado encargado)
+    public async Task<Empleado?> ObtenerPorTokenQRAsync(string tokenQR)
     {
-        _context.Encargados.Add(encargado);
-        await _context.SaveChangesAsync();
-        return encargado;
+        var qr = await _context.EmpleadosQR
+            .Include(eq => eq.Empleado)
+                .ThenInclude(e => e.Persona)
+            .FirstOrDefaultAsync(eq => eq.TokenQR == tokenQR && eq.Activo == 1);
+
+        return qr?.Empleado;
     }
 
-    public async Task ActualizarAsync(Encargado encargado)
+    public async Task<IEnumerable<Empleado>> ObtenerTodosAsync()
+        => await _context.Empleados
+            .Include(e => e.Persona)
+            .Include(e => e.EmpleadoQR)
+            .Where(e => e.EmpleadoActivo == 1)
+            .AsNoTracking()
+            .ToListAsync();
+
+    public async Task<Empleado> AgregarAsync(Empleado empleado)
     {
-        _context.Encargados.Update(encargado);
+        _context.Empleados.Add(empleado);
+        await _context.SaveChangesAsync();
+        return empleado;
+    }
+
+    public async Task ActualizarAsync(Empleado empleado)
+    {
+        _context.Empleados.Update(empleado);
         await _context.SaveChangesAsync();
     }
 
-    public async Task EliminarAsync(Encargado encargado)
+    public async Task EliminarAsync(Empleado empleado)
     {
-        _context.Encargados.Remove(encargado);
+        _context.Empleados.Remove(empleado);
+        await _context.SaveChangesAsync();
+    }
+
+    public async Task<EmpleadoQR?> ObtenerQRPorCedulaAsync(string cedula)
+        => await _context.EmpleadosQR
+            .FirstOrDefaultAsync(eq => eq.CedulaRucPersona == cedula);
+
+    public async Task GuardarQRAsync(EmpleadoQR empleadoQR)
+    {
+        var existing = await _context.EmpleadosQR
+            .FirstOrDefaultAsync(eq => eq.CedulaRucPersona == empleadoQR.CedulaRucPersona);
+
+        if (existing is not null)
+        {
+            existing.TokenQR = empleadoQR.TokenQR;
+            existing.CodigoQR = empleadoQR.CodigoQR;
+            existing.FechaGeneracion = empleadoQR.FechaGeneracion;
+            existing.Activo = 1;
+            _context.EmpleadosQR.Update(existing);
+        }
+        else
+        {
+            _context.EmpleadosQR.Add(empleadoQR);
+        }
+
         await _context.SaveChangesAsync();
     }
 }
