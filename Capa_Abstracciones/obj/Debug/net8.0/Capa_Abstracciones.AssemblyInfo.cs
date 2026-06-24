@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Capa_Abstracciones")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+c0307e4c12f331af7f4f859305e812fc25987d7a")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+fe235e1507ea64ca4c8f906a6693c47c921b85cf")]
 [assembly: System.Reflection.AssemblyProductAttribute("Capa_Abstracciones")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Capa_Abstracciones")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
