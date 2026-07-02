@@ -1,3 +1,5 @@
+
+
 # Documentación de Base de Datos Oracle — Sistema GADICC Calificador
 
 ## Información General
