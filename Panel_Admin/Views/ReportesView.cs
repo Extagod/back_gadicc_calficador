@@ -16,7 +16,6 @@ public class ReportesView : UserControl
     private List<Calificacion> _calificaciones = new();
     private List<Empleado> _funcionarios = new();
     private ReporteResultado? _ultimo;
-    private bool _inicializado;
 
     // Filtros
     private DateTimePicker _desde = null!, _hasta = null!;
@@ -170,7 +169,7 @@ public class ReportesView : UserControl
 
     public async void Inicializar()
     {
-        if (_inicializado) return;
+        // Siempre recarga datos frescos al entrar a la sección (evita datos en caché desactualizados)
         _overlay.Mostrar("Cargando datos...");
         try
         {
@@ -182,7 +181,6 @@ public class ReportesView : UserControl
             _calificaciones = cal.IsSuccess ? cal.Value!.ToList() : new();
             _funcionarios = enc.IsSuccess ? enc.Value!.ToList() : new();
             CargarCombos();
-            _inicializado = true;
         }
         catch (Exception)
         {

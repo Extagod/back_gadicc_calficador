@@ -2,6 +2,7 @@ using Capa_Abstracciones.Entities;
 using Capa_Abstracciones.Enums;
 using Capa_Abstracciones.Interfaces;
 using LiveChartsCore;
+using LiveChartsCore.Measure;
 using LiveChartsCore.SkiaSharpView;
 using LiveChartsCore.SkiaSharpView.Painting;
 using LiveChartsCore.SkiaSharpView.WinForms;
@@ -16,11 +17,12 @@ public class DashboardView : UserControl
     private readonly IServiceProvider _sp;
 
     private MetricCard _cardTotal = null!, _cardExc = null!, _cardBuena = null!, _cardReg = null!, _cardMala = null!, _cardFunc = null!;
-    private CartesianChart _lineChart = null!, _barChart = null!;
+    private PieChart _pieChart = null!;
+    private CartesianChart _barChart = null!;
     private DataGridView _gridRecientes = null!;
     private FlowLayoutPanel _panelAlertas = null!;
     private LoadingOverlay _overlay = null!;
-    private Panel _lineEmpty = null!, _barEmpty = null!;
+    private Panel _pieEmpty = null!, _barEmpty = null!;
 
     public DashboardView(IServiceProvider serviceProvider)
     {
@@ -60,14 +62,14 @@ public class DashboardView : UserControl
             Dock = DockStyle.Top, Height = 300, ColumnCount = 2, RowCount = 1, BackColor = UITheme.Background,
             Margin = new Padding(0, 12, 0, 0)
         };
-        graficas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 58f));
-        graficas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 42f));
+        graficas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 40f));
+        graficas.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 60f));
 
-        var cardLine = CrearCardGrafica("Tendencia de calificaciones (últimos 14 días)", out _lineChart, out _lineEmpty);
-        cardLine.Margin = new Padding(0, 0, 6, 0);
+        var cardPie = CrearCardPie("Distribución por tipo de calificación", out _pieChart, out _pieEmpty);
+        cardPie.Margin = new Padding(0, 0, 6, 0);
         var cardBar = CrearCardGrafica("Calificaciones por funcionario", out _barChart, out _barEmpty);
         cardBar.Margin = new Padding(6, 0, 0, 0);
-        graficas.Controls.Add(cardLine, 0, 0);
+        graficas.Controls.Add(cardPie, 0, 0);
         graficas.Controls.Add(cardBar, 1, 0);
 
         // === Fila inferior: recientes + alertas ===
@@ -117,7 +119,25 @@ public class DashboardView : UserControl
     {
         var card = new RoundedPanel { Dock = DockStyle.Fill, Radius = 12, Padding = new Padding(16, 14, 16, 14) };
         var lbl = new Label { Text = titulo, Font = UITheme.SectionTitle, ForeColor = UITheme.TextPrimary, Dock = DockStyle.Top, Height = 30 };
-        chart = new CartesianChart { Dock = DockStyle.Fill, BackColor = UITheme.Card };
+        chart = new CartesianChart { Dock = DockStyle.Fill, BackColor = UITheme.Card, LegendPosition = LegendPosition.Bottom };
+        emptyState = new Panel { Dock = DockStyle.Fill, Visible = false, BackColor = UITheme.Card };
+        var lblEmpty = new Label
+        {
+            Text = "Sin datos para mostrar", Dock = DockStyle.Fill, TextAlign = ContentAlignment.MiddleCenter,
+            Font = UITheme.Body, ForeColor = UITheme.TextMuted
+        };
+        emptyState.Controls.Add(lblEmpty);
+        card.Controls.Add(chart);
+        card.Controls.Add(emptyState);
+        card.Controls.Add(lbl);
+        return card;
+    }
+
+    private RoundedPanel CrearCardPie(string titulo, out PieChart chart, out Panel emptyState)
+    {
+        var card = new RoundedPanel { Dock = DockStyle.Fill, Radius = 12, Padding = new Padding(16, 14, 16, 14) };
+        var lbl = new Label { Text = titulo, Font = UITheme.SectionTitle, ForeColor = UITheme.TextPrimary, Dock = DockStyle.Top, Height = 30 };
+        chart = new PieChart { Dock = DockStyle.Fill, BackColor = UITheme.Card, LegendPosition = LegendPosition.Bottom };
         emptyState = new Panel { Dock = DockStyle.Fill, Visible = false, BackColor = UITheme.Card };
         var lblEmpty = new Label
         {
@@ -167,30 +187,33 @@ public class DashboardView : UserControl
         _cardMala.Valor = cal.Count(c => c.Valor == ValorCalificacion.Mala).ToString();
         _cardFunc.Valor = func.Count.ToString();
 
-        // === Línea (tendencia 14 días) ===
-        var porDia = cal.GroupBy(c => c.FechaHora.Date).OrderBy(g => g.Key).TakeLast(14).ToList();
-        if (porDia.Count == 0)
+        // === Dona (distribución por tipo de calificación) ===
+        var distrib = new (string Nombre, int Valor, SKColor Color)[]
         {
-            _lineChart.Visible = false; _lineEmpty.Visible = true; _lineEmpty.BringToFront();
+            ("Excelente", cal.Count(c => c.Valor == ValorCalificacion.Excelente), new SKColor(46, 125, 50)),
+            ("Buena",     cal.Count(c => c.Valor == ValorCalificacion.Buena),     new SKColor(102, 187, 106)),
+            ("Regular",   cal.Count(c => c.Valor == ValorCalificacion.Regular),   new SKColor(245, 124, 0)),
+            ("Mala",      cal.Count(c => c.Valor == ValorCalificacion.Mala),      new SKColor(211, 47, 47)),
+        };
+        if (cal.Count == 0)
+        {
+            _pieChart.Visible = false; _pieEmpty.Visible = true; _pieEmpty.BringToFront();
         }
         else
         {
-            _lineEmpty.Visible = false; _lineChart.Visible = true;
-            _lineChart.XAxes = new[] { new Axis { Labels = porDia.Select(g => g.Key.ToString("dd/MM")).ToArray(), TextSize = 11 } };
-            _lineChart.YAxes = new[] { new Axis { MinLimit = 0, TextSize = 11 } };
-            _lineChart.Series = new ISeries[]
-            {
-                new LineSeries<int>
+            _pieEmpty.Visible = false; _pieChart.Visible = true;
+            _pieChart.Series = distrib.Where(d => d.Valor > 0).Select(d =>
+                new PieSeries<int>
                 {
-                    Values = porDia.Select(g => g.Count()).ToArray(),
-                    Name = "Calificaciones",
-                    Fill = new SolidColorPaint(new SKColor(30, 90, 168, 40)),
-                    Stroke = new SolidColorPaint(new SKColor(30, 90, 168)) { StrokeThickness = 3 },
-                    GeometrySize = 9,
-                    GeometryStroke = new SolidColorPaint(new SKColor(30, 90, 168)) { StrokeThickness = 3 },
-                    GeometryFill = new SolidColorPaint(SKColors.White)
-                }
-            };
+                    Values = new[] { d.Valor },
+                    Name = d.Nombre,
+                    Fill = new SolidColorPaint(d.Color),
+                    InnerRadius = 62,
+                    DataLabelsPaint = new SolidColorPaint(SKColors.White),
+                    DataLabelsSize = 15,
+                    DataLabelsPosition = PolarLabelsPosition.Middle,
+                    DataLabelsFormatter = point => point.Coordinate.PrimaryValue.ToString("0")
+                }).ToArray();
         }
 
         // === Barras (por funcionario, top 8) ===
@@ -214,13 +237,13 @@ public class DashboardView : UserControl
         {
             _barEmpty.Visible = false; _barChart.Visible = true;
             _barChart.XAxes = new[] { new Axis { Labels = porFunc.Select(x => x.Nombre).ToArray(), LabelsRotation = 20, TextSize = 10 } };
-            _barChart.YAxes = new[] { new Axis { MinLimit = 0, TextSize = 11 } };
+            _barChart.YAxes = new[] { new Axis { MinLimit = 0, TextSize = 11, MinStep = 1 } };
             _barChart.Series = new ISeries[]
             {
-                new ColumnSeries<int> { Values = porFunc.Select(x => x.Exc).ToArray(), Name = "Excelente", Fill = new SolidColorPaint(new SKColor(46, 125, 50)) },
-                new ColumnSeries<int> { Values = porFunc.Select(x => x.Bue).ToArray(), Name = "Buena", Fill = new SolidColorPaint(new SKColor(102, 187, 106)) },
-                new ColumnSeries<int> { Values = porFunc.Select(x => x.Reg).ToArray(), Name = "Regular", Fill = new SolidColorPaint(new SKColor(245, 124, 0)) },
-                new ColumnSeries<int> { Values = porFunc.Select(x => x.Mal).ToArray(), Name = "Mala", Fill = new SolidColorPaint(new SKColor(211, 47, 47)) }
+                new ColumnSeries<int> { Values = porFunc.Select(x => x.Exc).ToArray(), Name = "Excelente", Fill = new SolidColorPaint(new SKColor(46, 125, 50)), Rx = 5, Ry = 5, MaxBarWidth = 26 },
+                new ColumnSeries<int> { Values = porFunc.Select(x => x.Bue).ToArray(), Name = "Buena", Fill = new SolidColorPaint(new SKColor(102, 187, 106)), Rx = 5, Ry = 5, MaxBarWidth = 26 },
+                new ColumnSeries<int> { Values = porFunc.Select(x => x.Reg).ToArray(), Name = "Regular", Fill = new SolidColorPaint(new SKColor(245, 124, 0)), Rx = 5, Ry = 5, MaxBarWidth = 26 },
+                new ColumnSeries<int> { Values = porFunc.Select(x => x.Mal).ToArray(), Name = "Mala", Fill = new SolidColorPaint(new SKColor(211, 47, 47)), Rx = 5, Ry = 5, MaxBarWidth = 26 }
             };
         }
 
