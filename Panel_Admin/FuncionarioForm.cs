@@ -15,14 +15,18 @@ public partial class FuncionarioForm : Form
         if (datosExistentes is not null)
         {
             txtCedula.Text = datosExistentes.CedulaRucPersona;
-            txtCedula.ReadOnly = true; // No editar cédula en modo edición
+            txtCedula.Inner.ReadOnly = true;
+            txtCedula.Inner.BackColor = UI.UITheme.Background;
             txtNombre.Text = datosExistentes.Nombre;
             txtApellido.Text = datosExistentes.Apellido;
             txtCargo.Text = datosExistentes.Cargo ?? "";
             txtDireccion.Text = datosExistentes.Direccion ?? "";
+            lblTitulo.Text = "Editar Funcionario";
         }
-
-        this.Text = _esEdicion ? "Editar Funcionario" : "Nuevo Funcionario";
+        else
+        {
+            lblTitulo.Text = "Nuevo Funcionario";
+        }
     }
 
     private void BtnGuardar_Click(object? sender, EventArgs e)
@@ -31,12 +35,13 @@ public partial class FuncionarioForm : Form
         lblErrorNombre.Text = "";
         lblErrorApellido.Text = "";
 
-        if (string.IsNullOrWhiteSpace(txtCedula.Text))
+        var cedula = txtCedula.Text.Trim();
+        if (string.IsNullOrWhiteSpace(cedula))
         {
             lblErrorCedula.Text = "La cédula es obligatoria.";
             return;
         }
-        if (txtCedula.Text.Trim().Length < 10 || txtCedula.Text.Trim().Length > 14)
+        if (cedula.Length < 10 || cedula.Length > 14)
         {
             lblErrorCedula.Text = "La cédula debe tener entre 10 y 14 caracteres.";
             return;
@@ -54,20 +59,20 @@ public partial class FuncionarioForm : Form
 
         Resultado = new CrearEncargadoDto
         {
-            CedulaRucPersona = txtCedula.Text.Trim(),
+            CedulaRucPersona = cedula,
             Nombre = txtNombre.Text.Trim(),
             Apellido = txtApellido.Text.Trim(),
             Cargo = string.IsNullOrWhiteSpace(txtCargo.Text) ? null : txtCargo.Text.Trim(),
             Direccion = string.IsNullOrWhiteSpace(txtDireccion.Text) ? null : txtDireccion.Text.Trim()
         };
 
-        this.DialogResult = DialogResult.OK;
-        this.Close();
+        DialogResult = DialogResult.OK;
+        Close();
     }
 
     private void BtnCancelar_Click(object? sender, EventArgs e)
     {
-        this.DialogResult = DialogResult.Cancel;
-        this.Close();
+        DialogResult = DialogResult.Cancel;
+        Close();
     }
 }

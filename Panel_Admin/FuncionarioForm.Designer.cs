@@ -1,18 +1,21 @@
+using Panel_Admin.UI;
+
 namespace Panel_Admin;
 
 partial class FuncionarioForm
 {
     private System.ComponentModel.IContainer components = null;
-    private TextBox txtCedula;
-    private TextBox txtNombre;
-    private TextBox txtApellido;
-    private TextBox txtCargo;
-    private TextBox txtDireccion;
+    private UITextBox txtCedula;
+    private UITextBox txtNombre;
+    private UITextBox txtApellido;
+    private UITextBox txtCargo;
+    private UITextBox txtDireccion;
     private Label lblErrorCedula;
     private Label lblErrorNombre;
     private Label lblErrorApellido;
-    private Button btnGuardar;
-    private Button btnCancelar;
+    private UIButton btnGuardar;
+    private UIButton btnCancelar;
+    private Label lblTitulo;
 
     protected override void Dispose(bool disposing)
     {
@@ -21,118 +24,128 @@ partial class FuncionarioForm
         base.Dispose(disposing);
     }
 
+    private Label Etiqueta(string texto, int x, int y) => new()
+    {
+        Text = texto,
+        Font = new Font(UITheme.FontFamilySemibold, 8.5f, FontStyle.Bold),
+        ForeColor = UITheme.TextSecondary,
+        AutoSize = true,
+        Location = new Point(x, y)
+    };
+
+    private Label Error(int x, int y) => new()
+    {
+        Text = "",
+        Font = UITheme.Small,
+        ForeColor = UITheme.Danger,
+        AutoSize = true,
+        Location = new Point(x, y)
+    };
+
     private void InitializeComponent()
     {
-        this.txtCedula = new TextBox();
-        this.txtNombre = new TextBox();
-        this.txtApellido = new TextBox();
-        this.txtCargo = new TextBox();
-        this.txtDireccion = new TextBox();
-        this.lblErrorCedula = new Label();
-        this.lblErrorNombre = new Label();
-        this.lblErrorApellido = new Label();
-        this.btnGuardar = new Button();
-        this.btnCancelar = new Button();
-
-        var lblCedula = new Label();
-        var lblNombre = new Label();
-        var lblApellido = new Label();
-        var lblCargo = new Label();
-        var lblDireccion = new Label();
+        this.lblTitulo = new Label();
+        this.lblErrorCedula = Error(40, 118);
+        this.lblErrorNombre = Error(40, 190);
+        this.lblErrorApellido = Error(40, 262);
+        this.btnGuardar = new UIButton();
+        this.btnCancelar = new UIButton();
 
         this.SuspendLayout();
 
-        int x = 30, fieldW = 300;
+        // Form
+        this.ClientSize = new Size(480, 560);
+        this.FormBorderStyle = FormBorderStyle.None;
+        this.StartPosition = FormStartPosition.CenterParent;
+        this.BackColor = UITheme.Card;
+
+        // Barra superior de color
+        var barra = new Panel { Dock = DockStyle.Top, Height = 6, BackColor = UITheme.Primary };
+        this.Controls.Add(barra);
+
+        // Título
+        this.lblTitulo.Text = "Nuevo Funcionario";
+        this.lblTitulo.Font = UITheme.Title;
+        this.lblTitulo.ForeColor = UITheme.TextPrimary;
+        this.lblTitulo.AutoSize = true;
+        this.lblTitulo.Location = new Point(40, 30);
+        this.Controls.Add(this.lblTitulo);
+
+        // Botón cerrar
+        var btnX = new Label
+        {
+            Text = "✕",
+            Font = new Font(UITheme.FontFamily, 12f),
+            ForeColor = UITheme.TextMuted,
+            AutoSize = false,
+            Size = new Size(34, 30),
+            Location = new Point(432, 12),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Cursor = Cursors.Hand
+        };
+        btnX.Click += BtnCancelar_Click;
+        this.Controls.Add(btnX);
+
+        int x = 40, w = 400;
 
         // Cédula
-        lblCedula.Text = "Cédula/RUC *:";
-        lblCedula.Location = new Point(x, 20);
-        lblCedula.AutoSize = true;
-
-        this.txtCedula.Location = new Point(x, 43);
-        this.txtCedula.Size = new Size(fieldW, 23);
-        this.txtCedula.MaxLength = 14;
-
-        this.lblErrorCedula.Location = new Point(x, 68);
-        this.lblErrorCedula.Size = new Size(fieldW, 18);
-        this.lblErrorCedula.ForeColor = Color.Red;
-        this.lblErrorCedula.Font = new Font("Segoe UI", 8F);
-        this.lblErrorCedula.Text = "";
+        this.Controls.Add(Etiqueta("CÉDULA / RUC *", x, 74));
+        this.txtCedula = new UITextBox { Location = new Point(x, 92), Size = new Size(w, 42), PlaceholderText = "Ej: 0102030405" };
+        this.txtCedula.Inner.MaxLength = 14;
+        this.Controls.Add(this.txtCedula);
+        this.Controls.Add(this.lblErrorCedula);
 
         // Nombre
-        lblNombre.Text = "Nombre *:";
-        lblNombre.Location = new Point(x, 92);
-        lblNombre.AutoSize = true;
-
-        this.txtNombre.Location = new Point(x, 115);
-        this.txtNombre.Size = new Size(fieldW, 23);
-        this.txtNombre.MaxLength = 100;
-
-        this.lblErrorNombre.Location = new Point(x, 140);
-        this.lblErrorNombre.Size = new Size(fieldW, 18);
-        this.lblErrorNombre.ForeColor = Color.Red;
-        this.lblErrorNombre.Font = new Font("Segoe UI", 8F);
-        this.lblErrorNombre.Text = "";
+        this.Controls.Add(Etiqueta("NOMBRE *", x, 146));
+        this.txtNombre = new UITextBox { Location = new Point(x, 164), Size = new Size(w, 42), PlaceholderText = "Primer nombre" };
+        this.txtNombre.Inner.MaxLength = 100;
+        this.Controls.Add(this.txtNombre);
+        this.Controls.Add(this.lblErrorNombre);
 
         // Apellido
-        lblApellido.Text = "Apellido *:";
-        lblApellido.Location = new Point(x, 164);
-        lblApellido.AutoSize = true;
-
-        this.txtApellido.Location = new Point(x, 187);
-        this.txtApellido.Size = new Size(fieldW, 23);
-        this.txtApellido.MaxLength = 100;
-
-        this.lblErrorApellido.Location = new Point(x, 212);
-        this.lblErrorApellido.Size = new Size(fieldW, 18);
-        this.lblErrorApellido.ForeColor = Color.Red;
-        this.lblErrorApellido.Font = new Font("Segoe UI", 8F);
-        this.lblErrorApellido.Text = "";
+        this.Controls.Add(Etiqueta("APELLIDO *", x, 218));
+        this.txtApellido = new UITextBox { Location = new Point(x, 236), Size = new Size(w, 42), PlaceholderText = "Primer apellido" };
+        this.txtApellido.Inner.MaxLength = 100;
+        this.Controls.Add(this.txtApellido);
+        this.Controls.Add(this.lblErrorApellido);
 
         // Cargo
-        lblCargo.Text = "Cargo:";
-        lblCargo.Location = new Point(x, 236);
-        lblCargo.AutoSize = true;
-
-        this.txtCargo.Location = new Point(x, 259);
-        this.txtCargo.Size = new Size(fieldW, 23);
-        this.txtCargo.MaxLength = 100;
+        this.Controls.Add(Etiqueta("CARGO", x, 290));
+        this.txtCargo = new UITextBox { Location = new Point(x, 308), Size = new Size(w, 42), PlaceholderText = "Cargo que desempeña" };
+        this.txtCargo.Inner.MaxLength = 100;
+        this.Controls.Add(this.txtCargo);
 
         // Dirección
-        lblDireccion.Text = "Dirección:";
-        lblDireccion.Location = new Point(x, 292);
-        lblDireccion.AutoSize = true;
-
-        this.txtDireccion.Location = new Point(x, 315);
-        this.txtDireccion.Size = new Size(fieldW, 23);
-        this.txtDireccion.MaxLength = 300;
+        this.Controls.Add(Etiqueta("DIRECCIÓN", x, 362));
+        this.txtDireccion = new UITextBox { Location = new Point(x, 380), Size = new Size(w, 42), PlaceholderText = "Dirección de domicilio" };
+        this.txtDireccion.Inner.MaxLength = 300;
+        this.Controls.Add(this.txtDireccion);
 
         // Botones
-        this.btnGuardar.Text = "Guardar";
-        this.btnGuardar.Location = new Point(x, 360);
-        this.btnGuardar.Size = new Size(120, 35);
-        this.btnGuardar.Click += BtnGuardar_Click;
-
         this.btnCancelar.Text = "Cancelar";
-        this.btnCancelar.Location = new Point(x + 140, 360);
-        this.btnCancelar.Size = new Size(120, 35);
+        this.btnCancelar.Outline = true;
+        this.btnCancelar.BaseColor = UITheme.Neutral;
+        this.btnCancelar.Size = new Size(150, 44);
+        this.btnCancelar.Location = new Point(x, 470);
         this.btnCancelar.Click += BtnCancelar_Click;
+        this.Controls.Add(this.btnCancelar);
 
-        // Form
-        this.ClientSize = new Size(370, 420);
-        this.Controls.AddRange(new Control[]
+        this.btnGuardar.Text = "Guardar";
+        this.btnGuardar.BaseColor = UITheme.Primary;
+        this.btnGuardar.Size = new Size(200, 44);
+        this.btnGuardar.Location = new Point(x + 160, 470);
+        this.btnGuardar.Click += BtnGuardar_Click;
+        this.Controls.Add(this.btnGuardar);
+
+        this.AcceptButton = this.btnGuardar;
+        this.CancelButton = this.btnCancelar;
+
+        this.Paint += (s, e) =>
         {
-            lblCedula, this.txtCedula, this.lblErrorCedula,
-            lblNombre, this.txtNombre, this.lblErrorNombre,
-            lblApellido, this.txtApellido, this.lblErrorApellido,
-            lblCargo, this.txtCargo,
-            lblDireccion, this.txtDireccion,
-            this.btnGuardar, this.btnCancelar
-        });
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.MaximizeBox = false;
-        this.MinimizeBox = false;
-        this.StartPosition = FormStartPosition.CenterParent;
+            using var pen = new Pen(UITheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+        };
+
         this.ResumeLayout(false);
         this.PerformLayout();
     }

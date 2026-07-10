@@ -1,8 +1,26 @@
+using Panel_Admin.UI;
+
 namespace Panel_Admin;
 
 partial class MainForm
 {
     private System.ComponentModel.IContainer components = null;
+
+    private Panel sidebar;
+    private Panel header;
+    private Panel content;
+    private Label lblLogo;
+    private Label lblLogoSub;
+    private SidebarButton navDashboard;
+    private SidebarButton navFuncionarios;
+    private SidebarButton navCalificaciones;
+    private SidebarButton navReportes;
+    private SidebarButton navCerrarSesion;
+    private Label lblSeccion;
+    private Label lblSeccionDesc;
+    private Label lblFecha;
+    private Label lblUsuario;
+    private Label lblAvatar;
 
     protected override void Dispose(bool disposing)
     {
@@ -13,222 +31,177 @@ partial class MainForm
 
     private void InitializeComponent()
     {
-        this.components = new System.ComponentModel.Container();
-        this.tabControl = new TabControl();
-        this.tabFuncionarios = new TabPage();
-        this.tabCalificaciones = new TabPage();
+        this.sidebar = new Panel();
+        this.header = new Panel();
+        this.content = new Panel();
+        this.lblLogo = new Label();
+        this.lblLogoSub = new Label();
+        this.navDashboard = new SidebarButton();
+        this.navFuncionarios = new SidebarButton();
+        this.navCalificaciones = new SidebarButton();
+        this.navReportes = new SidebarButton();
+        this.navCerrarSesion = new SidebarButton();
+        this.lblSeccion = new Label();
+        this.lblSeccionDesc = new Label();
+        this.lblFecha = new Label();
+        this.lblUsuario = new Label();
+        this.lblAvatar = new Label();
 
-        // Tab Funcionarios controls
-        this.dgvFuncionarios = new DataGridView();
-        this.txtBusqueda = new TextBox();
-        this.btnNuevo = new Button();
-        this.btnEditar = new Button();
-        this.btnEliminar = new Button();
-
-        // Tab Calificaciones controls
-        this.dgvCalificaciones = new DataGridView();
-        this.lblNoCalificaciones = new Label();
-        this.lblTotal = new Label();
-        this.lblExcelente = new Label();
-        this.lblBuena = new Label();
-        this.lblRegular = new Label();
-        this.lblMala = new Label();
-        this.dtpFechaInicio = new DateTimePicker();
-        this.dtpFechaFin = new DateTimePicker();
-        this.btnFiltrarFechas = new Button();
-
-        var lblBusqueda = new Label();
-        var lblInfo = new Label();
-        var lblFechaInicioLabel = new Label();
-        var lblFechaFinLabel = new Label();
-
-        ((System.ComponentModel.ISupportInitialize)this.dgvFuncionarios).BeginInit();
-        ((System.ComponentModel.ISupportInitialize)this.dgvCalificaciones).BeginInit();
         this.SuspendLayout();
 
-        // === TabControl ===
-        this.tabControl.Dock = DockStyle.Fill;
-        this.tabControl.TabPages.AddRange(new TabPage[] { this.tabFuncionarios, this.tabCalificaciones });
-        this.tabControl.SelectedIndexChanged += TabControl_SelectedIndexChanged;
-
-        // === Tab Funcionarios ===
-        this.tabFuncionarios.Text = "Funcionarios";
-        this.tabFuncionarios.Padding = new Padding(10);
-        this.btnDashboard = new Button();
-        this.tabFuncionarios.Controls.AddRange(new Control[]
-        {
-            lblBusqueda, this.txtBusqueda, this.dgvFuncionarios,
-            this.btnNuevo, this.btnEditar, this.btnEliminar, this.btnDashboard, lblInfo
-        });
-
-        lblBusqueda.Text = "Buscar:";
-        lblBusqueda.Location = new Point(15, 15);
-        lblBusqueda.AutoSize = true;
-
-        this.txtBusqueda.Location = new Point(70, 12);
-        this.txtBusqueda.Size = new Size(300, 23);
-        this.txtBusqueda.PlaceholderText = "Buscar por nombre o apellido...";
-        this.txtBusqueda.TextChanged += TxtBusqueda_TextChanged;
-
-        // Buttons
-        this.btnNuevo.Text = "➕ Nuevo";
-        this.btnNuevo.Location = new Point(400, 8);
-        this.btnNuevo.Size = new Size(110, 30);
-        this.btnNuevo.Click += BtnNuevo_Click;
-
-        this.btnEditar.Text = "✏️ Editar";
-        this.btnEditar.Location = new Point(520, 8);
-        this.btnEditar.Size = new Size(110, 30);
-        this.btnEditar.Click += BtnEditar_Click;
-
-        this.btnEliminar.Text = "🗑️ Eliminar";
-        this.btnEliminar.Location = new Point(640, 8);
-        this.btnEliminar.Size = new Size(110, 30);
-        this.btnEliminar.ForeColor = Color.DarkRed;
-        this.btnEliminar.Click += BtnEliminar_Click;
-
-        this.btnDashboard.Text = "📊 Dashboard";
-        this.btnDashboard.Location = new Point(780, 8);
-        this.btnDashboard.Size = new Size(120, 30);
-        this.btnDashboard.BackColor = Color.FromArgb(33, 150, 243);
-        this.btnDashboard.ForeColor = Color.White;
-        this.btnDashboard.FlatStyle = FlatStyle.Flat;
-        this.btnDashboard.Click += BtnDashboard_Click;
-
-        // DataGridView
-        this.dgvFuncionarios.Location = new Point(15, 45);
-        this.dgvFuncionarios.Size = new Size(940, 500);
-        this.dgvFuncionarios.AllowUserToAddRows = false;
-        this.dgvFuncionarios.AllowUserToDeleteRows = false;
-        this.dgvFuncionarios.ReadOnly = true;
-        this.dgvFuncionarios.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        this.dgvFuncionarios.MultiSelect = false;
-        this.dgvFuncionarios.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-        this.dgvFuncionarios.SelectionChanged += DgvFuncionarios_SelectionChanged;
-        this.dgvFuncionarios.CellDoubleClick += DgvFuncionarios_CellDoubleClick;
-
-        // Info label
-        lblInfo.Text = "💡 Doble clic en un funcionario para ver su detalle y código QR";
-        lblInfo.Location = new Point(15, 552);
-        lblInfo.AutoSize = true;
-        lblInfo.ForeColor = Color.Gray;
-        lblInfo.Font = new Font("Segoe UI", 8.5F, FontStyle.Italic);
-
-        // === Tab Calificaciones ===
-        this.tabCalificaciones.Text = "Calificaciones";
-        this.tabCalificaciones.Padding = new Padding(10);
-        this.btnVerTodas = new Button();
-        this.tabCalificaciones.Controls.AddRange(new Control[]
-        {
-            this.dgvCalificaciones, this.lblNoCalificaciones,
-            this.lblTotal, this.lblExcelente, this.lblBuena, this.lblRegular, this.lblMala,
-            lblFechaInicioLabel, this.dtpFechaInicio,
-            lblFechaFinLabel, this.dtpFechaFin,
-            this.btnFiltrarFechas, this.btnVerTodas
-        });
-
-        this.dgvCalificaciones.Location = new Point(15, 15);
-        this.dgvCalificaciones.Size = new Size(700, 530);
-        this.dgvCalificaciones.AllowUserToAddRows = false;
-        this.dgvCalificaciones.AllowUserToDeleteRows = false;
-        this.dgvCalificaciones.ReadOnly = true;
-        this.dgvCalificaciones.SelectionMode = DataGridViewSelectionMode.FullRowSelect;
-        this.dgvCalificaciones.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
-
-        this.lblNoCalificaciones.Text = "Cargando calificaciones...";
-        this.lblNoCalificaciones.Location = new Point(15, 250);
-        this.lblNoCalificaciones.Size = new Size(500, 25);
-        this.lblNoCalificaciones.Font = new Font("Segoe UI", 10F, FontStyle.Italic);
-        this.lblNoCalificaciones.Visible = false;
-
-        int statsX = 730;
-
-        this.lblTotal.Text = "Total: 0";
-        this.lblTotal.Location = new Point(statsX, 20);
-        this.lblTotal.Size = new Size(200, 25);
-        this.lblTotal.Font = new Font("Segoe UI", 11F, FontStyle.Bold);
-
-        this.lblExcelente.Text = "Excelente: 0";
-        this.lblExcelente.Location = new Point(statsX, 55);
-        this.lblExcelente.Size = new Size(200, 22);
-        this.lblExcelente.ForeColor = Color.FromArgb(46, 125, 50);
-
-        this.lblBuena.Text = "Buena: 0";
-        this.lblBuena.Location = new Point(statsX, 80);
-        this.lblBuena.Size = new Size(200, 22);
-        this.lblBuena.ForeColor = Color.FromArgb(56, 142, 60);
-
-        this.lblRegular.Text = "Regular: 0";
-        this.lblRegular.Location = new Point(statsX, 105);
-        this.lblRegular.Size = new Size(200, 22);
-        this.lblRegular.ForeColor = Color.FromArgb(245, 124, 0);
-
-        this.lblMala.Text = "Mala: 0";
-        this.lblMala.Location = new Point(statsX, 130);
-        this.lblMala.Size = new Size(200, 22);
-        this.lblMala.ForeColor = Color.FromArgb(198, 40, 40);
-
-        lblFechaInicioLabel.Text = "Desde:";
-        lblFechaInicioLabel.Location = new Point(statsX, 180);
-        lblFechaInicioLabel.AutoSize = true;
-
-        this.dtpFechaInicio.Location = new Point(statsX, 203);
-        this.dtpFechaInicio.Size = new Size(220, 23);
-        this.dtpFechaInicio.Format = DateTimePickerFormat.Short;
-
-        lblFechaFinLabel.Text = "Hasta:";
-        lblFechaFinLabel.Location = new Point(statsX, 235);
-        lblFechaFinLabel.AutoSize = true;
-
-        this.dtpFechaFin.Location = new Point(statsX, 258);
-        this.dtpFechaFin.Size = new Size(220, 23);
-        this.dtpFechaFin.Format = DateTimePickerFormat.Short;
-
-        this.btnFiltrarFechas.Text = "🔍 Filtrar";
-        this.btnFiltrarFechas.Location = new Point(statsX, 295);
-        this.btnFiltrarFechas.Size = new Size(100, 35);
-        this.btnFiltrarFechas.Click += BtnFiltrarFechas_Click;
-
-        this.btnVerTodas.Text = "📋 Ver Todas";
-        this.btnVerTodas.Location = new Point(statsX + 110, 295);
-        this.btnVerTodas.Size = new Size(110, 35);
-        this.btnVerTodas.Click += BtnVerTodas_Click;
-
-        // === MainForm ===
+        // === Form ===
         this.AutoScaleDimensions = new SizeF(7F, 15F);
         this.AutoScaleMode = AutoScaleMode.Font;
-        this.ClientSize = new Size(1000, 620);
-        this.Controls.Add(this.tabControl);
-        this.Text = "Panel Administrativo - Gestión de Funcionarios";
+        this.ClientSize = new Size(1280, 760);
+        this.MinimumSize = new Size(1120, 680);
+        this.BackColor = UITheme.Background;
+        this.Text = "GADICC Calificador — Panel Administrativo";
         this.StartPosition = FormStartPosition.CenterScreen;
+        this.WindowState = FormWindowState.Maximized;
+        this.Font = UITheme.Body;
 
-        ((System.ComponentModel.ISupportInitialize)this.dgvFuncionarios).EndInit();
-        ((System.ComponentModel.ISupportInitialize)this.dgvCalificaciones).EndInit();
+        // === Sidebar ===
+        this.sidebar.Dock = DockStyle.Left;
+        this.sidebar.Width = 250;
+        this.sidebar.BackColor = UITheme.Sidebar;
+
+        // Cabecera del sidebar (logo)
+        var brand = new Panel { Dock = DockStyle.Top, Height = 110, BackColor = UITheme.Sidebar };
+        var logoImg = LogoHelper.Logo;
+        if (logoImg != null)
+        {
+            var pic = new PictureBox
+            {
+                Image = logoImg,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                Size = new Size(210, 78),
+                Location = new Point(20, 16)
+            };
+            brand.Controls.Add(pic);
+        }
+        else
+        {
+            this.lblLogo.Text = "CAÑAR";
+            this.lblLogo.Font = new Font(UITheme.FontFamilySemibold, 20f, FontStyle.Bold);
+            this.lblLogo.ForeColor = Color.White;
+            this.lblLogo.AutoSize = false;
+            this.lblLogo.AutoEllipsis = true;
+            this.lblLogo.Location = new Point(20, 28);
+            this.lblLogo.Size = new Size(210, 32);
+            this.lblLogoSub.Text = "MUNICIPIO INTERCULTURAL";
+            this.lblLogoSub.Font = new Font(UITheme.FontFamily, 8f, FontStyle.Regular);
+            this.lblLogoSub.ForeColor = Color.FromArgb(150, 175, 210);
+            this.lblLogoSub.AutoSize = false;
+            this.lblLogoSub.AutoEllipsis = true;
+            this.lblLogoSub.Location = new Point(22, 62);
+            this.lblLogoSub.Size = new Size(210, 18);
+            brand.Controls.Add(this.lblLogoSub);
+            brand.Controls.Add(this.lblLogo);
+        }
+
+        // Botones de navegación (se agregan en orden inverso por Dock=Top)
+        this.navReportes.Text = "Reportes";
+        this.navReportes.Icono = "📄";
+        this.navReportes.Click += (s, e) => Navegar("reportes");
+
+        this.navCalificaciones.Text = "Calificaciones";
+        this.navCalificaciones.Icono = "⭐";
+        this.navCalificaciones.Click += (s, e) => Navegar("calificaciones");
+
+        this.navFuncionarios.Text = "Funcionarios";
+        this.navFuncionarios.Icono = "👥";
+        this.navFuncionarios.Click += (s, e) => Navegar("funcionarios");
+
+        this.navDashboard.Text = "Dashboard";
+        this.navDashboard.Icono = "📊";
+        this.navDashboard.Click += (s, e) => Navegar("dashboard");
+
+        // Separador superior de la lista
+        var navTop = new Panel { Dock = DockStyle.Top, Height = 12, BackColor = UITheme.Sidebar };
+
+        // Cerrar sesión (abajo)
+        this.navCerrarSesion.Text = "Cerrar sesión";
+        this.navCerrarSesion.Icono = "⏻";
+        this.navCerrarSesion.Dock = DockStyle.Bottom;
+        this.navCerrarSesion.Click += (s, e) => CerrarSesion();
+
+        // Orden de adición: primero los Top en orden inverso al visual
+        this.sidebar.Controls.Add(this.navReportes);
+        this.sidebar.Controls.Add(this.navCalificaciones);
+        this.sidebar.Controls.Add(this.navFuncionarios);
+        this.sidebar.Controls.Add(this.navDashboard);
+        this.sidebar.Controls.Add(navTop);
+        this.sidebar.Controls.Add(brand);
+        this.sidebar.Controls.Add(this.navCerrarSesion);
+
+        // === Header ===
+        this.header.Dock = DockStyle.Top;
+        this.header.Height = 78;
+        this.header.BackColor = UITheme.HeaderBar;
+        this.header.Paint += (s, e) =>
+        {
+            using var pen = new Pen(UITheme.Border, 1);
+            e.Graphics.DrawLine(pen, 0, this.header.Height - 1, this.header.Width, this.header.Height - 1);
+        };
+
+        this.lblSeccion.Text = "Dashboard";
+        this.lblSeccion.Font = new Font(UITheme.FontFamilySemibold, 16f, FontStyle.Bold);
+        this.lblSeccion.ForeColor = UITheme.TextPrimary;
+        this.lblSeccion.AutoSize = true;
+        this.lblSeccion.Location = new Point(28, 16);
+
+        this.lblSeccionDesc.Text = "";
+        this.lblSeccionDesc.Font = UITheme.Small;
+        this.lblSeccionDesc.ForeColor = UITheme.TextSecondary;
+        this.lblSeccionDesc.AutoSize = true;
+        this.lblSeccionDesc.Location = new Point(30, 48);
+
+        this.lblFecha.Text = "";
+        this.lblFecha.Font = UITheme.Body;
+        this.lblFecha.ForeColor = UITheme.TextSecondary;
+        this.lblFecha.AutoSize = false;
+        this.lblFecha.AutoEllipsis = true;
+        this.lblFecha.TextAlign = ContentAlignment.MiddleRight;
+        this.lblFecha.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        this.lblFecha.Size = new Size(300, 20);
+        this.lblFecha.Location = new Point(this.ClientSize.Width - 440, 20);
+
+        this.lblUsuario.Text = "";
+        this.lblUsuario.Font = UITheme.BodyBold;
+        this.lblUsuario.ForeColor = UITheme.TextPrimary;
+        this.lblUsuario.AutoSize = false;
+        this.lblUsuario.AutoEllipsis = true;
+        this.lblUsuario.TextAlign = ContentAlignment.MiddleRight;
+        this.lblUsuario.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        this.lblUsuario.Size = new Size(240, 20);
+        this.lblUsuario.Location = new Point(this.ClientSize.Width - 440, 42);
+
+        this.lblAvatar.Text = "A";
+        this.lblAvatar.Font = new Font(UITheme.FontFamilySemibold, 14f, FontStyle.Bold);
+        this.lblAvatar.ForeColor = Color.White;
+        this.lblAvatar.BackColor = UITheme.Primary;
+        this.lblAvatar.AutoSize = false;
+        this.lblAvatar.TextAlign = ContentAlignment.MiddleCenter;
+        this.lblAvatar.Size = new Size(44, 44);
+        this.lblAvatar.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+        this.lblAvatar.Location = new Point(this.ClientSize.Width - 130, 18);
+
+        this.header.Controls.AddRange(new Control[]
+        {
+            this.lblSeccion, this.lblSeccionDesc, this.lblFecha, this.lblUsuario, this.lblAvatar
+        });
+
+        // === Content ===
+        this.content.Dock = DockStyle.Fill;
+        this.content.BackColor = UITheme.Background;
+        this.content.Padding = new Padding(24);
+
+        // Orden de adición al form: content (fill) primero, luego header (top), luego sidebar (left)
+        this.Controls.Add(this.content);
+        this.Controls.Add(this.header);
+        this.Controls.Add(this.sidebar);
+
         this.ResumeLayout(false);
     }
-
-    private TabControl tabControl;
-    private TabPage tabFuncionarios;
-    private TabPage tabCalificaciones;
-
-    // Tab Funcionarios
-    private DataGridView dgvFuncionarios;
-    private TextBox txtBusqueda;
-    private Button btnNuevo;
-    private Button btnEditar;
-    private Button btnEliminar;
-    private Button btnDashboard;
-
-    // Tab Calificaciones
-    private DataGridView dgvCalificaciones;
-    private Label lblNoCalificaciones;
-    private Label lblTotal;
-    private Label lblExcelente;
-    private Label lblBuena;
-    private Label lblRegular;
-    private Label lblMala;
-    private DateTimePicker dtpFechaInicio;
-    private DateTimePicker dtpFechaFin;
-    private Button btnFiltrarFechas;
-    private Button btnVerTodas;
 }

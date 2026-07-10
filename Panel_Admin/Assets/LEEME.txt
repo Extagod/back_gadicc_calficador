@@ -1,0 +1,17 @@
+COLOCA AQUÍ EL LOGO DEL MUNICIPIO
+=================================
+
+Guarda la imagen del logo de CAÑAR (Municipio Intercultural) en esta carpeta
+con EXACTAMENTE este nombre:
+
+    logo_canar.png
+
+Formatos aceptados (se busca en este orden): logo_canar.png, logo_canar.jpg, logo.png
+
+Recomendado: imagen cuadrada (por ejemplo 512x512 o 1024x1024), fondo transparente
+o el fondo azul original. El sistema la escala automáticamente sin deformarla.
+
+Si el archivo no existe, el panel mostrará un logo de texto de respaldo
+("CAÑAR — Municipio Intercultural") para que nada se vea roto.
+
+El archivo se copia automáticamente junto al ejecutable al compilar.

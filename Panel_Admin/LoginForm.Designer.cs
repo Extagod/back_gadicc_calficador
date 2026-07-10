@@ -1,3 +1,6 @@
+using Panel_Admin.UI;
+using System.Drawing.Drawing2D;
+
 namespace Panel_Admin;
 
 partial class LoginForm
@@ -5,13 +8,12 @@ partial class LoginForm
     private System.ComponentModel.IContainer components = null;
     private TextBox txtUsuario;
     private TextBox txtPassword;
-    private Button btnLogin;
-    private Label lblUsuario;
-    private Label lblPassword;
+    private UIButton btnLogin;
     private Label lblErrorUsuario;
     private Label lblErrorPassword;
     private Label lblError;
-    private Label lblTitulo;
+    private CheckBox chkMostrar;
+    private Label lblCargando;
 
     protected override void Dispose(bool disposing)
     {
@@ -24,83 +26,240 @@ partial class LoginForm
     {
         this.txtUsuario = new TextBox();
         this.txtPassword = new TextBox();
-        this.btnLogin = new Button();
-        this.lblUsuario = new Label();
-        this.lblPassword = new Label();
+        this.btnLogin = new UIButton();
         this.lblErrorUsuario = new Label();
         this.lblErrorPassword = new Label();
         this.lblError = new Label();
-        this.lblTitulo = new Label();
+        this.chkMostrar = new CheckBox();
+        this.lblCargando = new Label();
+
         this.SuspendLayout();
 
-        // lblTitulo
-        this.lblTitulo.AutoSize = true;
-        this.lblTitulo.Font = new Font("Segoe UI", 14F, FontStyle.Bold);
-        this.lblTitulo.Location = new Point(100, 20);
-        this.lblTitulo.Text = "Panel Administrativo";
+        // === Form ===
+        int W = 1040, H = 660;
+        this.ClientSize = new Size(W, H);
+        this.FormBorderStyle = FormBorderStyle.None;
+        this.StartPosition = FormStartPosition.CenterScreen;
+        this.BackColor = UITheme.Background;
+        this.Text = "GADICC Calificador - Acceso";
 
-        // lblUsuario
-        this.lblUsuario.AutoSize = true;
-        this.lblUsuario.Location = new Point(50, 70);
-        this.lblUsuario.Text = "Usuario:";
+        // === Panel lateral izquierdo (branding) ===
+        int brandW = 440;
+        var panelBrand = new Panel
+        {
+            Dock = DockStyle.Left,
+            Width = brandW,
+            BackColor = UITheme.Sidebar
+        };
+        panelBrand.Paint += (s, e) =>
+        {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            using var brush = new LinearGradientBrush(panelBrand.ClientRectangle,
+                UITheme.Primary, UITheme.Sidebar, 55f);
+            e.Graphics.FillRectangle(brush, panelBrand.ClientRectangle);
+        };
 
-        // txtUsuario
-        this.txtUsuario.Location = new Point(50, 90);
-        this.txtUsuario.MaxLength = 50;
-        this.txtUsuario.Size = new Size(280, 23);
+        // Logo institucional (imagen real con respaldo a texto)
+        var logoImg = LogoHelper.Logo;
+        if (logoImg != null)
+        {
+            int lw = 300, lh = 240;
+            var pic = new PictureBox
+            {
+                Image = logoImg,
+                SizeMode = PictureBoxSizeMode.Zoom,
+                BackColor = Color.Transparent,
+                Size = new Size(lw, lh),
+                Location = new Point((brandW - lw) / 2, 150)
+            };
+            panelBrand.Controls.Add(pic);
+        }
+        else
+        {
+            var logo = new Label
+            {
+                Text = "CAÑAR",
+                Font = new Font(UITheme.FontFamilySemibold, 38f, FontStyle.Bold),
+                ForeColor = Color.White,
+                BackColor = Color.Transparent,
+                AutoSize = false,
+                Size = new Size(brandW, 66),
+                Location = new Point(0, 210),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            var logoSub = new Label
+            {
+                Text = "MUNICIPIO INTERCULTURAL",
+                Font = new Font(UITheme.FontFamily, 12f, FontStyle.Regular),
+                ForeColor = UITheme.PrimaryLight,
+                BackColor = Color.Transparent,
+                AutoSize = false,
+                Size = new Size(brandW, 26),
+                Location = new Point(0, 280),
+                TextAlign = ContentAlignment.MiddleCenter
+            };
+            panelBrand.Controls.AddRange(new Control[] { logo, logoSub });
+        }
 
-        // lblErrorUsuario
-        this.lblErrorUsuario.AutoSize = true;
-        this.lblErrorUsuario.ForeColor = Color.Red;
-        this.lblErrorUsuario.Location = new Point(50, 115);
+        var lblTagline = new Label
+        {
+            Text = "GADICC Calificador\nSistema de Calificación de Funcionarios",
+            Font = new Font(UITheme.FontFamily, 11f, FontStyle.Regular),
+            ForeColor = Color.FromArgb(185, 205, 230),
+            BackColor = Color.Transparent,
+            AutoSize = false,
+            Size = new Size(brandW, 56),
+            Location = new Point(0, 450),
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        panelBrand.Controls.Add(lblTagline);
+        this.Controls.Add(panelBrand);
+
+        // === Área derecha (formulario) ===
+        int baseX = brandW + 60;          // 500
+        int fieldW = W - baseX - 70;      // ~470
+
+        var lblBienvenida = new Label
+        {
+            Text = "Bienvenido",
+            Font = new Font(UITheme.FontFamilySemibold, 24f, FontStyle.Bold),
+            ForeColor = UITheme.TextPrimary,
+            AutoSize = false,
+            Size = new Size(fieldW, 44),
+            Location = new Point(baseX, 110)
+        };
+        var lblSubtitulo = new Label
+        {
+            Text = "Panel Administrativo\nInicie sesión para continuar",
+            Font = new Font(UITheme.FontFamily, 11f, FontStyle.Regular),
+            ForeColor = UITheme.TextSecondary,
+            AutoSize = false,
+            Size = new Size(fieldW, 56),
+            Location = new Point(baseX, 158)
+        };
+
+        var lblUsuario = new Label
+        {
+            Text = "USUARIO",
+            Font = new Font(UITheme.FontFamilySemibold, 8.5f, FontStyle.Bold),
+            ForeColor = UITheme.TextSecondary,
+            AutoSize = true,
+            Location = new Point(baseX, 224)
+        };
+        var contUsuario = new UITextBox { Location = new Point(baseX, 247), Size = new Size(fieldW, 46) };
+        contUsuario.PlaceholderText = "Ingrese su usuario";
+        this.txtUsuario = contUsuario.Inner;
+
         this.lblErrorUsuario.Text = "";
+        this.lblErrorUsuario.ForeColor = UITheme.Danger;
+        this.lblErrorUsuario.Font = UITheme.Small;
+        this.lblErrorUsuario.AutoSize = false;
+        this.lblErrorUsuario.AutoEllipsis = true;
+        this.lblErrorUsuario.Size = new Size(fieldW, 18);
+        this.lblErrorUsuario.Location = new Point(baseX, 296);
 
-        // lblPassword
-        this.lblPassword.AutoSize = true;
-        this.lblPassword.Location = new Point(50, 140);
-        this.lblPassword.Text = "Contraseña:";
+        var lblPassword = new Label
+        {
+            Text = "CONTRASEÑA",
+            Font = new Font(UITheme.FontFamilySemibold, 8.5f, FontStyle.Bold),
+            ForeColor = UITheme.TextSecondary,
+            AutoSize = true,
+            Location = new Point(baseX, 322)
+        };
+        var contPassword = new UITextBox { Location = new Point(baseX, 345), Size = new Size(fieldW, 46) };
+        contPassword.PlaceholderText = "Ingrese su contraseña";
+        contPassword.UseSystemPasswordChar = true;
+        this.txtPassword = contPassword.Inner;
 
-        // txtPassword
-        this.txtPassword.Location = new Point(50, 160);
-        this.txtPassword.MaxLength = 128;
-        this.txtPassword.PasswordChar = '*';
-        this.txtPassword.Size = new Size(280, 23);
+        this.chkMostrar.Text = "Mostrar contraseña";
+        this.chkMostrar.Font = UITheme.Small;
+        this.chkMostrar.ForeColor = UITheme.TextSecondary;
+        this.chkMostrar.AutoSize = true;
+        this.chkMostrar.Location = new Point(baseX, 398);
+        this.chkMostrar.CheckedChanged += (s, e) => txtPassword.UseSystemPasswordChar = !chkMostrar.Checked;
 
-        // lblErrorPassword
-        this.lblErrorPassword.AutoSize = true;
-        this.lblErrorPassword.ForeColor = Color.Red;
-        this.lblErrorPassword.Location = new Point(50, 185);
         this.lblErrorPassword.Text = "";
+        this.lblErrorPassword.ForeColor = UITheme.Danger;
+        this.lblErrorPassword.Font = UITheme.Small;
+        this.lblErrorPassword.AutoSize = false;
+        this.lblErrorPassword.AutoEllipsis = true;
+        this.lblErrorPassword.TextAlign = ContentAlignment.MiddleRight;
+        this.lblErrorPassword.Size = new Size(220, 18);
+        this.lblErrorPassword.Location = new Point(baseX + fieldW - 220, 398);
 
-        // btnLogin
-        this.btnLogin.Location = new Point(130, 220);
-        this.btnLogin.Size = new Size(120, 35);
         this.btnLogin.Text = "Iniciar Sesión";
+        this.btnLogin.Size = new Size(fieldW, 50);
+        this.btnLogin.Location = new Point(baseX, 438);
         this.btnLogin.Click += BtnLogin_Click;
 
-        // lblError
-        this.lblError.AutoSize = true;
-        this.lblError.ForeColor = Color.Red;
-        this.lblError.Location = new Point(50, 270);
-        this.lblError.MaximumSize = new Size(280, 0);
-        this.lblError.Text = "";
+        this.lblCargando.Text = "";
+        this.lblCargando.Font = UITheme.Small;
+        this.lblCargando.ForeColor = UITheme.Primary;
+        this.lblCargando.AutoSize = false;
+        this.lblCargando.AutoEllipsis = true;
+        this.lblCargando.TextAlign = ContentAlignment.MiddleCenter;
+        this.lblCargando.Size = new Size(fieldW, 22);
+        this.lblCargando.Location = new Point(baseX, 498);
 
-        // LoginForm
-        this.ClientSize = new Size(380, 320);
-        this.Controls.Add(this.lblTitulo);
-        this.Controls.Add(this.lblUsuario);
-        this.Controls.Add(this.txtUsuario);
-        this.Controls.Add(this.lblErrorUsuario);
-        this.Controls.Add(this.lblPassword);
-        this.Controls.Add(this.txtPassword);
-        this.Controls.Add(this.lblErrorPassword);
-        this.Controls.Add(this.btnLogin);
-        this.Controls.Add(this.lblError);
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.MaximizeBox = false;
-        this.StartPosition = FormStartPosition.CenterScreen;
-        this.Text = "Login - Panel Administrativo";
+        this.lblError.Text = "";
+        this.lblError.ForeColor = UITheme.Danger;
+        this.lblError.Font = UITheme.BodyBold;
+        this.lblError.AutoSize = false;
+        this.lblError.AutoEllipsis = true;
+        this.lblError.TextAlign = ContentAlignment.MiddleCenter;
+        this.lblError.Size = new Size(fieldW, 24);
+        this.lblError.Location = new Point(baseX, 522);
+
+        // Botón cerrar (X)
+        var btnCerrar = new Label
+        {
+            Text = "✕",
+            Font = new Font(UITheme.FontFamily, 13f, FontStyle.Regular),
+            ForeColor = UITheme.TextMuted,
+            AutoSize = false,
+            Size = new Size(38, 34),
+            Location = new Point(W - 46, 10),
+            TextAlign = ContentAlignment.MiddleCenter,
+            Cursor = Cursors.Hand
+        };
+        btnCerrar.Click += (s, e) => Application.Exit();
+        btnCerrar.MouseEnter += (s, e) => btnCerrar.ForeColor = UITheme.Danger;
+        btnCerrar.MouseLeave += (s, e) => btnCerrar.ForeColor = UITheme.TextMuted;
+
+        this.Controls.AddRange(new Control[]
+        {
+            lblBienvenida, lblSubtitulo,
+            lblUsuario, contUsuario, this.lblErrorUsuario,
+            lblPassword, contPassword, this.chkMostrar, this.lblErrorPassword,
+            this.btnLogin, this.lblCargando, this.lblError, btnCerrar
+        });
+
+        this.MouseDown += Login_MouseDown;
+        this.AcceptButton = this.btnLogin;
         this.ResumeLayout(false);
         this.PerformLayout();
+
+        this.Paint += (s, e) =>
+        {
+            using var pen = new Pen(UITheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+        };
     }
+
+    private void Login_MouseDown(object? sender, MouseEventArgs e)
+    {
+        if (e.Button == MouseButtons.Left)
+        {
+            NativeMethods.ReleaseCapture();
+            NativeMethods.SendMessage(this.Handle, 0xA1, 0x2, 0);
+        }
+    }
+}
+
+internal static class NativeMethods
+{
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    public static extern int SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    public static extern bool ReleaseCapture();
 }

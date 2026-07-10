@@ -1,5 +1,4 @@
 using Capa_Abstracciones.Interfaces;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace Panel_Admin;
 
@@ -23,7 +22,7 @@ public partial class LoginForm : Form
         lblErrorPassword.Text = "";
         lblError.Text = "";
 
-        // Check lockout
+        // Bloqueo temporal por intentos fallidos
         if (_bloqueadoHasta.HasValue && DateTime.UtcNow < _bloqueadoHasta.Value)
         {
             var restante = (int)(_bloqueadoHasta.Value - DateTime.UtcNow).TotalSeconds;
@@ -31,17 +30,25 @@ public partial class LoginForm : Form
             return;
         }
 
-        // Validate empty fields
+        // Validación de campos vacíos
+        bool valido = true;
         if (string.IsNullOrWhiteSpace(txtUsuario.Text))
         {
-            lblErrorUsuario.Text = "El nombre de usuario es obligatorio.";
-            return;
+            lblErrorUsuario.Text = "El usuario es obligatorio.";
+            valido = false;
         }
         if (string.IsNullOrWhiteSpace(txtPassword.Text))
         {
             lblErrorPassword.Text = "La contraseña es obligatoria.";
-            return;
+            valido = false;
         }
+        if (!valido) return;
+
+        // Indicador de carga
+        btnLogin.Enabled = false;
+        btnLogin.Text = "Verificando...";
+        lblCargando.Text = "Validando credenciales, por favor espere...";
+        Application.DoEvents();
 
         try
         {
@@ -51,27 +58,37 @@ public partial class LoginForm : Form
             if (resultado.IsAuthenticated)
             {
                 _intentosFallidos = 0;
-                var mainForm = new MainForm(_serviceProvider);
+                lblCargando.Text = "Acceso concedido. Abriendo panel...";
+                var mainForm = new MainForm(_serviceProvider, resultado.NombreUsuario ?? "Administrador");
+                mainForm.FormClosed += (_, _) => Close();
                 mainForm.Show();
                 this.Hide();
             }
             else
             {
                 _intentosFallidos++;
+                lblCargando.Text = "";
                 if (_intentosFallidos >= 5)
                 {
                     _bloqueadoHasta = DateTime.UtcNow.AddSeconds(60);
-                    lblError.Text = "Cuenta bloqueada por 60 segundos.";
+                    lblError.Text = "Cuenta bloqueada por 60 segundos (5 intentos fallidos).";
                 }
                 else
                 {
-                    lblError.Text = "Credenciales incorrectas.";
+                    lblError.Text = $"Credenciales incorrectas. Intento {_intentosFallidos} de 5.";
                 }
             }
         }
         catch (Exception)
         {
+            lblCargando.Text = "";
             lblError.Text = "No se puede conectar al servidor. Intente nuevamente.";
+        }
+        finally
+        {
+            btnLogin.Enabled = true;
+            btnLogin.Text = "Iniciar Sesión";
+            if (lblError.Text != "") lblCargando.Text = "";
         }
     }
 }

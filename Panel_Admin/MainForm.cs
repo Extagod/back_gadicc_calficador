@@ -1,292 +1,99 @@
-using Microsoft.Extensions.DependencyInjection;
-using Capa_Abstracciones.Interfaces;
-using Capa_Abstracciones.DTOs;
-using Capa_Abstracciones.Entities;
-using Capa_Abstracciones.Enums;
+using System.Globalization;
+using Panel_Admin.UI;
+using Panel_Admin.Views;
 
 namespace Panel_Admin;
 
 public partial class MainForm : Form
 {
     private readonly IServiceProvider _serviceProvider;
-    private readonly IEncargadoService _encargadoService;
-    private readonly ICalificacionService _calificacionService;
-    private List<Empleado> _funcionarios = new();
-    private Empleado? _selectedFuncionario;
+    private readonly string _nombreUsuario;
 
-    public MainForm(IServiceProvider serviceProvider)
+    private DashboardView? _dashboard;
+    private FuncionariosView? _funcionarios;
+    private CalificacionesView? _calificaciones;
+    private ReportesView? _reportes;
+
+    private string _moduloActual = "";
+
+    public MainForm(IServiceProvider serviceProvider, string nombreUsuario = "Administrador")
     {
         _serviceProvider = serviceProvider;
-        var scope = serviceProvider.CreateScope();
-        _encargadoService = scope.ServiceProvider.GetRequiredService<IEncargadoService>();
-        _calificacionService = scope.ServiceProvider.GetRequiredService<ICalificacionService>();
+        _nombreUsuario = nombreUsuario;
         InitializeComponent();
-        this.Load += MainForm_Load;
+
+        // Header: usuario y fecha
+        lblUsuario.Text = _nombreUsuario;
+        lblAvatar.Text = string.IsNullOrWhiteSpace(_nombreUsuario) ? "A" : _nombreUsuario.Substring(0, 1).ToUpper();
+        var cultura = new CultureInfo("es-ES");
+        lblFecha.Text = DateTime.Now.ToString("dddd, dd 'de' MMMM 'de' yyyy", cultura);
+
+        this.Load += (_, _) => Navegar("dashboard");
     }
 
-    private async void MainForm_Load(object? sender, EventArgs e)
+    private void Navegar(string modulo)
     {
-        await CargarFuncionariosAsync();
-    }
+        if (_moduloActual == modulo) return;
+        _moduloActual = modulo;
 
-    // === Tab Funcionarios ===
-    private async Task CargarFuncionariosAsync()
-    {
-        var resultado = await _encargadoService.ObtenerTodosAsync();
-        if (resultado.IsSuccess)
+        // Estado visual de la navegación
+        navDashboard.Active = modulo == "dashboard";
+        navFuncionarios.Active = modulo == "funcionarios";
+        navCalificaciones.Active = modulo == "calificaciones";
+        navReportes.Active = modulo == "reportes";
+
+        content.Controls.Clear();
+        Control? vista = null;
+        string titulo = "", desc = "";
+
+        switch (modulo)
         {
-            _funcionarios = resultado.Value!.ToList();
-            RefrescarGrid();
+            case "dashboard":
+                _dashboard ??= new DashboardView(_serviceProvider);
+                vista = _dashboard;
+                titulo = "Dashboard";
+                desc = "Resumen general y estadísticas de calificaciones";
+                _dashboard.CargarDatos();
+                break;
+            case "funcionarios":
+                _funcionarios ??= new FuncionariosView(_serviceProvider);
+                vista = _funcionarios;
+                titulo = "Gestión de Funcionarios";
+                desc = "Administre los funcionarios registrados y sus códigos QR";
+                _funcionarios.CargarDatos();
+                break;
+            case "calificaciones":
+                _calificaciones ??= new CalificacionesView(_serviceProvider);
+                vista = _calificaciones;
+                titulo = "Calificaciones recibidas";
+                desc = "Consulte y analice las valoraciones registradas por los ciudadanos";
+                _calificaciones.CargarDatos();
+                break;
+            case "reportes":
+                _reportes ??= new ReportesView(_serviceProvider);
+                vista = _reportes;
+                titulo = "Reportes";
+                desc = "Genere y exporte reportes por rango de fechas y funcionario";
+                _reportes.Inicializar();
+                break;
+        }
+
+        lblSeccion.Text = titulo;
+        lblSeccionDesc.Text = desc;
+
+        if (vista != null)
+        {
+            vista.Dock = DockStyle.Fill;
+            content.Controls.Add(vista);
         }
     }
 
-    private void RefrescarGrid()
+    private void CerrarSesion()
     {
-        var filtro = txtBusqueda.Text.Trim().ToLower();
-        var datos = _funcionarios.AsEnumerable();
-
-        if (filtro.Length >= 1)
+        if (Notificador.Confirmar(this, "¿Desea cerrar la sesión actual y volver a la pantalla de inicio?",
+            "Cerrar sesión", "Cerrar sesión"))
         {
-            datos = datos.Where(f =>
-                (f.Persona?.PrimerNombre?.ToLower().Contains(filtro) ?? false) ||
-                (f.Persona?.PrimerApellido?.ToLower().Contains(filtro) ?? false) ||
-                f.CedulaRucPersona.ToLower().Contains(filtro));
+            this.Close();
         }
-
-        dgvFuncionarios.DataSource = datos.Select(f => new
-        {
-            Cedula = f.CedulaRucPersona,
-            Nombre = f.Persona?.PrimerNombre ?? "",
-            Apellido = f.Persona?.PrimerApellido ?? "",
-            Cargo = f.Cargo ?? "",
-            Direccion = f.Persona?.Direccion ?? "",
-            QR = string.IsNullOrEmpty(f.EmpleadoQR?.CodigoQR) ? "❌" : "✅"
-        }).ToList();
-    }
-
-    private void TxtBusqueda_TextChanged(object? sender, EventArgs e)
-    {
-        RefrescarGrid();
-    }
-
-    private async void BtnNuevo_Click(object? sender, EventArgs e)
-    {
-        using var form = new FuncionarioForm();
-        if (form.ShowDialog(this) == DialogResult.OK && form.Resultado is not null)
-        {
-            try
-            {
-                var resultado = await _encargadoService.CrearEncargadoAsync(form.Resultado);
-                if (resultado.IsSuccess)
-                {
-                    await CargarFuncionariosAsync();
-                }
-                else
-                {
-                    MessageBox.Show(resultado.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("No se pudo completar la operación. Verifique la conexión.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-    }
-
-    private async void BtnEditar_Click(object? sender, EventArgs e)
-    {
-        if (_selectedFuncionario is null)
-        {
-            MessageBox.Show("Seleccione un funcionario para editar.", "Validación",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        var datosActuales = new CrearEncargadoDto
-        {
-            CedulaRucPersona = _selectedFuncionario.CedulaRucPersona,
-            Nombre = _selectedFuncionario.Persona?.PrimerNombre ?? "",
-            Apellido = _selectedFuncionario.Persona?.PrimerApellido ?? "",
-            Cargo = _selectedFuncionario.Cargo,
-            Direccion = _selectedFuncionario.Persona?.Direccion
-        };
-
-        using var form = new FuncionarioForm(datosActuales);
-        if (form.ShowDialog(this) == DialogResult.OK && form.Resultado is not null)
-        {
-            try
-            {
-                var resultado = await _encargadoService.ActualizarEncargadoAsync(
-                    _selectedFuncionario.CedulaRucPersona, form.Resultado);
-                if (resultado.IsSuccess)
-                {
-                    await CargarFuncionariosAsync();
-                }
-                else
-                {
-                    MessageBox.Show(resultado.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("No se pudo completar la operación. Verifique la conexión.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-    }
-
-    private async void BtnEliminar_Click(object? sender, EventArgs e)
-    {
-        if (_selectedFuncionario is null)
-        {
-            MessageBox.Show("Seleccione un funcionario para eliminar.", "Validación",
-                MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        var nombre = _selectedFuncionario.Persona?.PrimerNombre ?? "";
-        var apellido = _selectedFuncionario.Persona?.PrimerApellido ?? "";
-        var confirm = MessageBox.Show(
-            $"¿Está seguro de eliminar a {nombre} {apellido}?\n\nEsta acción eliminará también todas sus calificaciones.",
-            "Confirmar Eliminación",
-            MessageBoxButtons.YesNo,
-            MessageBoxIcon.Warning);
-
-        if (confirm == DialogResult.Yes)
-        {
-            try
-            {
-                var resultado = await _encargadoService.EliminarEncargadoAsync(_selectedFuncionario.CedulaRucPersona);
-                if (resultado.IsSuccess)
-                {
-                    _selectedFuncionario = null;
-                    await CargarFuncionariosAsync();
-                }
-                else
-                {
-                    MessageBox.Show(resultado.ErrorMessage, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            catch (Exception)
-            {
-                MessageBox.Show("No se pudo completar la operación. Verifique la conexión.",
-                    "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-    }
-
-    private void DgvFuncionarios_SelectionChanged(object? sender, EventArgs e)
-    {
-        if (dgvFuncionarios.SelectedRows.Count > 0)
-        {
-            var cedula = dgvFuncionarios.SelectedRows[0].Cells["Cedula"].Value?.ToString();
-            _selectedFuncionario = _funcionarios.FirstOrDefault(f => f.CedulaRucPersona == cedula);
-        }
-    }
-
-    private void BtnDashboard_Click(object? sender, EventArgs e)
-    {
-        using var form = new DashboardForm(_serviceProvider);
-        form.ShowDialog(this);
-    }
-
-    private void DgvFuncionarios_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
-    {
-        if (e.RowIndex < 0) return;
-
-        var cedula = dgvFuncionarios.Rows[e.RowIndex].Cells["Cedula"].Value?.ToString();
-        var funcionario = _funcionarios.FirstOrDefault(f => f.CedulaRucPersona == cedula);
-        if (funcionario is null) return;
-
-        using var form = new DetalleFuncionarioForm(funcionario, _serviceProvider);
-        form.ShowDialog(this);
-
-        // Refrescar por si se regeneró el QR
-        _ = CargarFuncionariosAsync();
-    }
-
-    // === Tab Calificaciones ===
-    private async void TabControl_SelectedIndexChanged(object? sender, EventArgs e)
-    {
-        if (tabControl.SelectedTab == tabCalificaciones)
-        {
-            await CargarTodasCalificacionesAsync();
-        }
-    }
-
-    private async Task CargarTodasCalificacionesAsync()
-    {
-        var resultado = await _calificacionService.ObtenerTodasAsync();
-        if (resultado.IsSuccess)
-        {
-            var calificaciones = resultado.Value!.ToList();
-            MostrarCalificaciones(calificaciones);
-        }
-    }
-
-    private void MostrarCalificaciones(List<Calificacion> calificaciones)
-    {
-        if (calificaciones.Count == 0)
-        {
-            lblNoCalificaciones.Text = "No hay calificaciones registradas.";
-            lblNoCalificaciones.Visible = true;
-            dgvCalificaciones.DataSource = null;
-        }
-        else
-        {
-            lblNoCalificaciones.Visible = false;
-            dgvCalificaciones.DataSource = calificaciones
-                .OrderByDescending(c => c.FechaHora)
-                .Select(c => new
-                {
-                    Fecha = c.FechaHora.ToString("dd/MM/yyyy HH:mm"),
-                    Funcionario = c.Empleado?.Persona != null
-                        ? $"{c.Empleado.Persona.PrimerNombre} {c.Empleado.Persona.PrimerApellido}"
-                        : c.CedulaRucPersona,
-                    Cargo = c.Empleado?.Cargo ?? "—",
-                    Valor = c.Valor.ToString(),
-                    c.Comentarios
-                }).ToList();
-        }
-
-        lblTotal.Text = $"Total: {calificaciones.Count}";
-        lblExcelente.Text = $"Excelente: {calificaciones.Count(c => c.Valor == ValorCalificacion.Excelente)}";
-        lblBuena.Text = $"Buena: {calificaciones.Count(c => c.Valor == ValorCalificacion.Buena)}";
-        lblRegular.Text = $"Regular: {calificaciones.Count(c => c.Valor == ValorCalificacion.Regular)}";
-        lblMala.Text = $"Mala: {calificaciones.Count(c => c.Valor == ValorCalificacion.Mala)}";
-    }
-
-    private async void BtnFiltrarFechas_Click(object? sender, EventArgs e)
-    {
-        if (dtpFechaInicio.Value > dtpFechaFin.Value)
-        {
-            MessageBox.Show("La fecha de inicio no puede ser posterior a la fecha de fin.",
-                "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-            return;
-        }
-
-        // Si hay funcionario seleccionado, filtrar por ese funcionario
-        if (_selectedFuncionario is not null)
-        {
-            var resultado = await _calificacionService.ObtenerPorEmpleadoYRangoAsync(
-                _selectedFuncionario.CedulaRucPersona, dtpFechaInicio.Value, dtpFechaFin.Value);
-
-            if (resultado.IsSuccess)
-            {
-                var calificaciones = resultado.Value!.ToList();
-                MostrarCalificaciones(calificaciones);
-            }
-        }
-        else
-        {
-            // Sin filtro de funcionario, mostrar todas
-            await CargarTodasCalificacionesAsync();
-        }
-    }
-
-    private async void BtnVerTodas_Click(object? sender, EventArgs e)
-    {
-        await CargarTodasCalificacionesAsync();
     }
 }

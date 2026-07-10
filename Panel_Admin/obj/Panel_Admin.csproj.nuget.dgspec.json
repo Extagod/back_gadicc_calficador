@@ -339,6 +339,10 @@
           "framework": "net8.0-windows7.0",
           "targetAlias": "net8.0-windows",
           "dependencies": {
+            "ClosedXML": {
+              "target": "Package",
+              "version": "[0.104.2, )"
+            },
             "LiveChartsCore.SkiaSharpView.WinForms": {
               "target": "Package",
               "version": "[2.0.0-rc3.3, )"
@@ -366,6 +370,10 @@
             "Oracle.EntityFrameworkCore": {
               "target": "Package",
               "version": "[8.23.60, )"
+            },
+            "QuestPDF": {
+              "target": "Package",
+              "version": "[2024.12.3, )"
             },
             "System.Configuration.ConfigurationManager": {
               "target": "Package",

@@ -1,3 +1,5 @@
+using Panel_Admin.UI;
+
 namespace Panel_Admin;
 
 partial class DetalleFuncionarioForm
@@ -10,10 +12,11 @@ partial class DetalleFuncionarioForm
     private Label lblCargoValor;
     private Label lblDireccionValor;
     private Label lblTokenValor;
-    private Button btnRegenerarQR;
-    private Button btnGuardarQR;
-    private Button btnImprimirQR;
-    private Button btnCerrar;
+    private UIButton btnRegenerarQR;
+    private UIButton btnGuardarQR;
+    private UIButton btnImprimirQR;
+    private UIButton btnCerrar;
+    private Label lblTitulo;
 
     protected override void Dispose(bool disposing)
     {
@@ -22,134 +25,179 @@ partial class DetalleFuncionarioForm
         base.Dispose(disposing);
     }
 
+    private Label CampoTitulo(string t, int x, int y) => new()
+    {
+        Text = t,
+        Font = new Font(UITheme.FontFamilySemibold, 8f, FontStyle.Bold),
+        ForeColor = UITheme.TextSecondary,
+        AutoSize = true,
+        Location = new Point(x, y)
+    };
+    private Label CampoValor(int x, int y, int w) => new()
+    {
+        Text = "—",
+        Font = UITheme.BodyBold,
+        ForeColor = UITheme.TextPrimary,
+        AutoSize = false,
+        Size = new Size(w, 22),
+        Location = new Point(x, y + 16)
+    };
+
     private void InitializeComponent()
     {
         this.picQR = new PictureBox();
-        this.lblCedulaValor = new Label();
-        this.lblNombreValor = new Label();
-        this.lblApellidoValor = new Label();
-        this.lblCargoValor = new Label();
-        this.lblDireccionValor = new Label();
-        this.lblTokenValor = new Label();
-        this.btnRegenerarQR = new Button();
-        this.btnGuardarQR = new Button();
-        this.btnImprimirQR = new Button();
-        this.btnCerrar = new Button();
+        this.lblTitulo = new Label();
+        this.btnRegenerarQR = new UIButton();
+        this.btnGuardarQR = new UIButton();
+        this.btnImprimirQR = new UIButton();
+        this.btnCerrar = new UIButton();
 
-        var lblCedula = new Label();
-        var lblNombre = new Label();
-        var lblApellido = new Label();
-        var lblCargo = new Label();
-        var lblDireccion = new Label();
-        var lblToken = new Label();
-        var lblTitulo = new Label();
-
-        ((System.ComponentModel.ISupportInitialize)this.picQR).BeginInit();
         this.SuspendLayout();
 
-        int infoX = 20, valX = 120;
+        // Form
+        this.ClientSize = new Size(760, 560);
+        this.FormBorderStyle = FormBorderStyle.None;
+        this.StartPosition = FormStartPosition.CenterParent;
+        this.BackColor = UITheme.Background;
 
-        // Título
-        lblTitulo.Text = "Detalle del Funcionario";
-        lblTitulo.Font = new Font("Segoe UI", 12F, FontStyle.Bold);
-        lblTitulo.Location = new Point(infoX, 15);
-        lblTitulo.AutoSize = true;
+        var barra = new Panel { Dock = DockStyle.Top, Height = 6, BackColor = UITheme.Primary };
+        this.Controls.Add(barra);
 
-        // Info labels
-        lblCedula.Text = "Cédula:";
-        lblCedula.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblCedula.Location = new Point(infoX, 55);
-        lblCedula.AutoSize = true;
-        this.lblCedulaValor.Location = new Point(valX, 55);
-        this.lblCedulaValor.AutoSize = true;
-        this.lblCedulaValor.Font = new Font("Consolas", 9F);
+        this.lblTitulo.Text = "Detalle del Funcionario";
+        this.lblTitulo.Font = UITheme.Title;
+        this.lblTitulo.ForeColor = UITheme.TextPrimary;
+        this.lblTitulo.AutoSize = true;
+        this.lblTitulo.Location = new Point(28, 26);
+        this.Controls.Add(this.lblTitulo);
 
-        lblNombre.Text = "Nombre:";
-        lblNombre.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblNombre.Location = new Point(infoX, 80);
-        lblNombre.AutoSize = true;
-        this.lblNombreValor.Location = new Point(valX, 80);
-        this.lblNombreValor.AutoSize = true;
+        var btnX = new Label
+        {
+            Text = "✕", Font = new Font(UITheme.FontFamily, 12f), ForeColor = UITheme.TextMuted,
+            AutoSize = false, Size = new Size(34, 30), Location = new Point(712, 12),
+            TextAlign = ContentAlignment.MiddleCenter, Cursor = Cursors.Hand
+        };
+        btnX.Click += BtnCerrar_Click;
+        this.Controls.Add(btnX);
 
-        lblApellido.Text = "Apellido:";
-        lblApellido.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblApellido.Location = new Point(infoX, 105);
-        lblApellido.AutoSize = true;
-        this.lblApellidoValor.Location = new Point(valX, 105);
-        this.lblApellidoValor.AutoSize = true;
+        // === Tarjeta info (izquierda) ===
+        var cardInfo = new RoundedPanel
+        {
+            Location = new Point(28, 70),
+            Size = new Size(360, 400),
+            Radius = 12
+        };
+        int cx = 24, cyTop = 24, gap = 62;
+        var lblSecInfo = new Label
+        {
+            Text = "INFORMACIÓN PERSONAL",
+            Font = new Font(UITheme.FontFamilySemibold, 9f, FontStyle.Bold),
+            ForeColor = UITheme.Primary, AutoSize = true, Location = new Point(cx, cyTop)
+        };
+        cardInfo.Controls.Add(lblSecInfo);
 
-        lblCargo.Text = "Cargo:";
-        lblCargo.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblCargo.Location = new Point(infoX, 130);
-        lblCargo.AutoSize = true;
-        this.lblCargoValor.Location = new Point(valX, 130);
-        this.lblCargoValor.AutoSize = true;
+        cardInfo.Controls.Add(CampoTitulo("CÉDULA / RUC", cx, cyTop + 34));
+        this.lblCedulaValor = CampoValor(cx, cyTop + 34, 300); this.lblCedulaValor.Font = new Font("Consolas", 10f, FontStyle.Bold);
+        cardInfo.Controls.Add(this.lblCedulaValor);
 
-        lblDireccion.Text = "Dirección:";
-        lblDireccion.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblDireccion.Location = new Point(infoX, 155);
-        lblDireccion.AutoSize = true;
-        this.lblDireccionValor.Location = new Point(valX, 155);
-        this.lblDireccionValor.AutoSize = true;
+        cardInfo.Controls.Add(CampoTitulo("NOMBRE", cx, cyTop + 34 + gap));
+        this.lblNombreValor = CampoValor(cx, cyTop + 34 + gap, 300);
+        cardInfo.Controls.Add(this.lblNombreValor);
 
-        lblToken.Text = "Token QR:";
-        lblToken.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-        lblToken.Location = new Point(infoX, 180);
-        lblToken.AutoSize = true;
-        this.lblTokenValor.Location = new Point(valX, 180);
-        this.lblTokenValor.AutoSize = true;
-        this.lblTokenValor.Font = new Font("Consolas", 8.5F);
+        cardInfo.Controls.Add(CampoTitulo("APELLIDO", cx, cyTop + 34 + gap * 2));
+        this.lblApellidoValor = CampoValor(cx, cyTop + 34 + gap * 2, 300);
+        cardInfo.Controls.Add(this.lblApellidoValor);
 
-        // QR Image
-        this.picQR.Location = new Point(infoX, 210);
-        this.picQR.Size = new Size(250, 250);
-        this.picQR.BorderStyle = BorderStyle.FixedSingle;
-        this.picQR.SizeMode = PictureBoxSizeMode.Zoom;
+        cardInfo.Controls.Add(CampoTitulo("CARGO", cx, cyTop + 34 + gap * 3));
+        this.lblCargoValor = CampoValor(cx, cyTop + 34 + gap * 3, 300);
+        cardInfo.Controls.Add(this.lblCargoValor);
 
-        // Buttons - right of QR
-        int btnX = 290;
+        cardInfo.Controls.Add(CampoTitulo("DIRECCIÓN", cx, cyTop + 34 + gap * 4));
+        this.lblDireccionValor = CampoValor(cx, cyTop + 34 + gap * 4, 300);
+        cardInfo.Controls.Add(this.lblDireccionValor);
+
+        this.Controls.Add(cardInfo);
+
+        // === Tarjeta QR (derecha) ===
+        var cardQR = new RoundedPanel
+        {
+            Location = new Point(404, 70),
+            Size = new Size(328, 400),
+            Radius = 12
+        };
+        var lblSecQR = new Label
+        {
+            Text = "CÓDIGO QR",
+            Font = new Font(UITheme.FontFamilySemibold, 9f, FontStyle.Bold),
+            ForeColor = UITheme.Primary, AutoSize = true, Location = new Point(24, 20)
+        };
+        cardQR.Controls.Add(lblSecQR);
+
+        var panelQR = new Panel
+        {
+            Location = new Point(64, 50),
+            Size = new Size(200, 200),
+            BackColor = Color.White,
+            BorderStyle = BorderStyle.FixedSingle
+        };
+        this.picQR = new PictureBox { Dock = DockStyle.Fill, SizeMode = PictureBoxSizeMode.Zoom, BackColor = Color.White };
+        panelQR.Controls.Add(this.picQR);
+        cardQR.Controls.Add(panelQR);
+
+        this.lblTokenValor = new Label
+        {
+            Text = "Sin generar",
+            Font = new Font("Consolas", 8f),
+            ForeColor = UITheme.TextSecondary,
+            AutoSize = false,
+            Size = new Size(280, 18),
+            Location = new Point(24, 258),
+            TextAlign = ContentAlignment.MiddleCenter
+        };
+        cardQR.Controls.Add(this.lblTokenValor);
 
         this.btnRegenerarQR.Text = "Generar QR";
-        this.btnRegenerarQR.Location = new Point(btnX, 210);
-        this.btnRegenerarQR.Size = new Size(150, 35);
+        this.btnRegenerarQR.BaseColor = UITheme.Primary;
+        this.btnRegenerarQR.Size = new Size(130, 38);
+        this.btnRegenerarQR.Location = new Point(24, 288);
         this.btnRegenerarQR.Click += BtnRegenerarQR_Click;
+        cardQR.Controls.Add(this.btnRegenerarQR);
 
-        this.btnGuardarQR.Text = "Guardar QR";
-        this.btnGuardarQR.Location = new Point(btnX, 260);
-        this.btnGuardarQR.Size = new Size(150, 35);
+        this.btnGuardarQR.Text = "Guardar";
+        this.btnGuardarQR.Outline = true;
+        this.btnGuardarQR.BaseColor = UITheme.Primary;
+        this.btnGuardarQR.Size = new Size(150, 38);
+        this.btnGuardarQR.Location = new Point(160, 288);
         this.btnGuardarQR.Click += BtnGuardarQR_Click;
+        cardQR.Controls.Add(this.btnGuardarQR);
 
         this.btnImprimirQR.Text = "Imprimir QR";
-        this.btnImprimirQR.Location = new Point(btnX, 310);
-        this.btnImprimirQR.Size = new Size(150, 35);
+        this.btnImprimirQR.Outline = true;
+        this.btnImprimirQR.BaseColor = UITheme.Neutral;
+        this.btnImprimirQR.Size = new Size(286, 38);
+        this.btnImprimirQR.Location = new Point(24, 336);
         this.btnImprimirQR.Click += BtnImprimirQR_Click;
+        cardQR.Controls.Add(this.btnImprimirQR);
 
+        this.Controls.Add(cardQR);
+
+        // Cerrar (abajo)
         this.btnCerrar.Text = "Cerrar";
-        this.btnCerrar.Location = new Point(btnX, 420);
-        this.btnCerrar.Size = new Size(150, 35);
+        this.btnCerrar.Outline = true;
+        this.btnCerrar.BaseColor = UITheme.Neutral;
+        this.btnCerrar.Size = new Size(160, 42);
+        this.btnCerrar.Location = new Point(572, 494);
         this.btnCerrar.Click += BtnCerrar_Click;
+        this.Controls.Add(this.btnCerrar);
 
-        // Form
-        this.ClientSize = new Size(470, 480);
-        this.Controls.AddRange(new Control[]
+        this.AcceptButton = this.btnCerrar;
+        this.CancelButton = this.btnCerrar;
+
+        this.Paint += (s, e) =>
         {
-            lblTitulo,
-            lblCedula, this.lblCedulaValor,
-            lblNombre, this.lblNombreValor,
-            lblApellido, this.lblApellidoValor,
-            lblCargo, this.lblCargoValor,
-            lblDireccion, this.lblDireccionValor,
-            lblToken, this.lblTokenValor,
-            this.picQR,
-            this.btnRegenerarQR, this.btnGuardarQR, this.btnImprimirQR, this.btnCerrar
-        });
-        this.FormBorderStyle = FormBorderStyle.FixedDialog;
-        this.MaximizeBox = false;
-        this.MinimizeBox = false;
-        this.StartPosition = FormStartPosition.CenterParent;
-        this.Text = "Detalle del Funcionario";
+            using var pen = new Pen(UITheme.Border, 1);
+            e.Graphics.DrawRectangle(pen, 0, 0, Width - 1, Height - 1);
+        };
 
-        ((System.ComponentModel.ISupportInitialize)this.picQR).EndInit();
         this.ResumeLayout(false);
         this.PerformLayout();
     }
