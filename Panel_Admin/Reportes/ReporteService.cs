@@ -352,8 +352,56 @@ public class ReporteService
         rangoResumen.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
         rangoResumen.Style.Border.OutsideBorderColor = bordeCol;
         rangoResumen.Style.Border.InsideBorderColor = bordeCol;
-        ws.Column(1).Width = 22; ws.Column(2).Width = 14; ws.Column(3).Width = 14;
         ws.Row(hr).Height = 20;
+
+        // ---- Tabla por funcionario dentro de la hoja Resumen ----
+        if (r.PorFuncionario.Count > 0)
+        {
+            int tf = rw + 2; // fila de inicio (deja un espacio)
+            ws.Cell(tf, 1).Value = r.FuncionarioUnico ? "Detalle del funcionario" : "Calificaciones por funcionario";
+            ws.Range(tf, 1, tf, 8).Merge();
+            ws.Cell(tf, 1).Style.Font.Bold = true;
+            ws.Cell(tf, 1).Style.Font.FontSize = 12;
+            ws.Cell(tf, 1).Style.Font.FontColor = azul;
+            tf++;
+
+            var headF = new[] { "Funcionario", "Cargo", "Total", "Excelente", "Buena", "Regular", "Mala", "% Excelente" };
+            for (int i = 0; i < headF.Length; i++)
+            {
+                var cell = ws.Cell(tf, i + 1);
+                cell.Value = headF[i];
+                cell.Style.Font.Bold = true;
+                cell.Style.Fill.BackgroundColor = azul;
+                cell.Style.Font.FontColor = XLColor.White;
+                cell.Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+            }
+            ws.Row(tf).Height = 20;
+            int fr = tf + 1;
+            foreach (var f in r.PorFuncionario)
+            {
+                ws.Cell(fr, 1).Value = f.Nombre;
+                ws.Cell(fr, 2).Value = f.Cargo;
+                ws.Cell(fr, 3).Value = f.Total;
+                ws.Cell(fr, 4).Value = f.Excelente;
+                ws.Cell(fr, 5).Value = f.Buena;
+                ws.Cell(fr, 6).Value = f.Regular;
+                ws.Cell(fr, 7).Value = f.Mala;
+                ws.Cell(fr, 8).Value = Math.Round(f.PorcentajeExcelente, 1) / 100.0;
+                ws.Cell(fr, 8).Style.NumberFormat.Format = "0.0%";
+                for (int col = 3; col <= 8; col++) ws.Cell(fr, col).Style.Alignment.Horizontal = XLAlignmentHorizontalValues.Center;
+                if ((fr - tf) % 2 == 0) ws.Range(fr, 1, fr, 8).Style.Fill.BackgroundColor = gris;
+                fr++;
+            }
+            var rangoF = ws.Range(tf, 1, fr - 1, 8);
+            rangoF.Style.Border.OutsideBorder = XLBorderStyleValues.Thin;
+            rangoF.Style.Border.InsideBorder = XLBorderStyleValues.Thin;
+            rangoF.Style.Border.OutsideBorderColor = bordeCol;
+            rangoF.Style.Border.InsideBorderColor = bordeCol;
+        }
+
+        // Anchos de columna de la hoja Resumen
+        ws.Column(1).Width = 30; ws.Column(2).Width = 24;
+        for (int c = 3; c <= 8; c++) ws.Column(c).Width = 12;
 
         // ============ HOJA POR FUNCIONARIO ============
         if (r.PorFuncionario.Count > 0)
